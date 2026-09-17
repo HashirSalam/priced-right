@@ -39,6 +39,7 @@ RAW_DIR = REPO_ROOT / "data" / "raw" / "tori"
 RUNS_DIR = REPO_ROOT / "docs" / "runs"
 
 STOP_STATUSES = {403, 429}
+GONE_STATUSES = {404, 410}  # listing removed: recorded as a failure and not retried
 MAX_CONSECUTIVE_ERRORS = 5
 CSV_COLUMNS = [
     "listing_id", "title", "description", "price_eur", "condition", "model_group", "memory",
@@ -134,15 +135,20 @@ def item_pass(client: tori.ToriClient, run_dir: Path, collected_at: str, listing
             consecutive_errors = 0
         except urllib.error.HTTPError as error:
             if error.code in STOP_STATUSES:
-                raise StopCollection(f"HTTP {error.code} on listing {listing_id}; stopping to respect the site")
-            append_jsonl(failures_path, {"listing_id": listing_id, "reason": f"http_{error.code}"})
-            consecutive_errors = 0 if error.code in (404, 410) else consecutive_errors + 1
+                raise StopCollection(f"HTTP {error.code} on listing {listing_id}; stopping to respect the site") from error
+            if error.code in GONE_STATUSES:
+                append_jsonl(failures_path, {"listing_id": listing_id, "reason": f"http_{error.code}"})
+                consecutive_errors = 0
+            else:
+                # Server errors (5xx) and other statuses are transient: not recorded, so --resume retries them.
+                consecutive_errors += 1
+                log(run_dir, f"error on {listing_id}: HTTP {error.code}")
         except (OSError, http.client.HTTPException, ValueError, KeyError) as error:
             # OSError covers URLError and, on Python 3.9, socket.timeout during read.
             consecutive_errors += 1
             log(run_dir, f"error on {listing_id}: {type(error).__name__}: {error}")
-            if consecutive_errors >= MAX_CONSECUTIVE_ERRORS:
-                raise StopCollection(f"{consecutive_errors} consecutive errors; stopping")
+        if consecutive_errors >= MAX_CONSECUTIVE_ERRORS:
+            raise StopCollection(f"{consecutive_errors} consecutive errors; stopping")
         if n % 100 == 0 or n == len(todo):
             log(run_dir, f"listing {n}/{len(todo)}")
 
@@ -194,7 +200,7 @@ def summarize(run_dir: Path, search_records, item_records, failures, listings, c
         "median_price_by_model_group": {str(k): statistics.median(v) for k, v in group_prices(listings, "model_group").items()},
         "median_price_by_seller_type": {str(k): statistics.median(v) for k, v in group_prices(listings, "seller_type").items()},
         "description_chars": quantiles([len(r["description"] or "") for r in listings]),
-        "descriptions_with_scrubbed_contacts": sum(1 for r in listings if "[phone]" in (r["description"] or "") or "[email]" in (r["description"] or "")),
+        "descriptions_with_scrubbed_contacts": sum(1 for r in listings if any(tag in (r["description"] or "") for tag in ("[url]", "[phone]", "[email]", "[number]"))),
         "requests_this_session": {
             "count": len(log_entries),
             "statuses": dict(Counter(str(e["status"]) for e in log_entries)),
@@ -246,7 +252,7 @@ def render_report(s: Dict[str, Any]) -> str:
         f"- Model group: {fmt(s['model_group'])}",
         f"- Memory: {fmt(s['memory'])}",
         f"- Region: {fmt(s['region'])}",
-        f"- Description length (chars): {s['description_chars']}; descriptions with scrubbed phone/email: {s['descriptions_with_scrubbed_contacts']}",
+        f"- Description length (chars): {s['description_chars']}; descriptions with scrubbed contact details: {s['descriptions_with_scrubbed_contacts']}",
         "",
     ]
     return "\n".join(lines)

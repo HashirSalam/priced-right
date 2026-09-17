@@ -41,3 +41,6 @@
 2026-09-17T13:27:04+00:00 listing pass: 2194 already done, 1 to fetch
 2026-09-17T13:27:07+00:00 listing 1/1
 2026-09-17T13:27:07+00:00 wrote 2178 listings to data/raw/tori/iphones_2026-09-17T110158Z/listings.csv
+2026-09-17T13:51:56+00:00 re-scrubbed with extended phone pattern (WhatsApp links, 358… without plus): 8 description and 0 title replacements; listings.csv and summary rebuilt, no new requests
+2026-09-17T13:53:07+00:00 re-scrubbed with catch-all for 9-12 digit numbers: 2 description and 0 title replacements; listings.csv and summary rebuilt, no new requests
+2026-09-17T13:54:39+00:00 masked 1 link(s) to a private seller's personal website with [url]; listings.csv rebuilt, no new requests

@@ -64,10 +64,10 @@ gantt
 
 ### Weekend 1 · Sat–Sun 19–20 Sep: clean data and first models
 
-- [ ] **Preprocessing:** drop accessories, 0 € swap ads and the 3 Samsung listings; get the exact model and battery % from title and description; fill in missing model and memory where the text allows; mark relistings → `data/processed/iphones_clean.csv`
+- [ ] **Preprocessing:** drop accessories, 0 € swap ads and the 1 Samsung phone; relabel the 2 iPhones mis-tagged with a Galaxy model group; derive exact model, release year, battery %, and warranty/receipt/damage flags from title and description; fill in missing model and memory where the text allows; mark relistings → `data/processed/iphones_clean.csv` (features listed in [data-dictionary.md](docs/data-dictionary.md#derived-in-preprocessing))
 - [ ] **EDA:** prices by model, storage, condition, seller type and region; price spread; keyword associations → notebook and figures
-- [ ] **Evaluation setup:** grouped k-fold split so relistings stay together; MAE in € and median % error → reusable function
-- [ ] **Models:** median baseline by model and storage, Ridge (TF-IDF + fields), Random Forest → comparison table
+- [ ] **Evaluation setup:** `GroupKFold` so relistings stay together; fit all preprocessing (e.g. TF-IDF) inside the folds with a scikit-learn `Pipeline` to avoid leakage; report RMSLE, MAE in € and median % error → reusable function
+- [ ] **Models:** train on `log1p(price)`; median baseline by model and storage, Ridge (TF-IDF + fields), Random Forest, optionally gradient boosting → comparison table
 
 The median baseline is grouped by model and storage. If a fitted model does not clearly beat
 that lookup table, the finding is about the problem rather than about our modelling, and it
@@ -75,8 +75,8 @@ belongs in the report either way.
 
 ### Weekend 2 · Sat–Sun 26–27 Sep: app and report
 
-- [ ] **Final model:** pick the best model; price ranges from held-out errors; save it for the app
-- [ ] **Fairness check:** error by region and seller type; privacy and misuse discussion
+- [ ] **Final model:** pick the best model; price ranges with conformal prediction (MAPIE), so each range has a stated coverage (e.g. 80%) and widens for expensive phones; save the fitted pipeline for the app
+- [ ] **Fairness check:** error and range coverage by region and seller type; privacy and misuse discussion, using the [privacy validation and legal context](docs/data-collection-notes.md#privacy-validation) notes
 - [ ] **Flask app:** seller mode (expected price and range), buyer mode (below / in line / above comparable listings)
 - [ ] **Report and presentation**
 
@@ -176,7 +176,12 @@ flowchart LR
     class planned todo
 ```
 
-Add folders only when there is something to put in them (e.g. `notebooks/` for EDA).
+Add folders only when there is something to put in them. When they are needed, follow the [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org/) conventions:
+
+- `notebooks/`: numbered with initials, e.g. `1.0-hsa-eda.ipynb`, `2.0-aa-baseline.ipynb`
+- `models/`: saved fitted pipelines for the app
+- `reports/figures/`: figures for the report
+- `data/processed/`: cleaned data, always rebuilt by code from `data/raw/`, which is never edited by hand
 
 `data/` is committed so the whole group works from the same dataset. Listing descriptions are
 free text written by sellers, so **the repository must stay private**. A full iPhone run is about

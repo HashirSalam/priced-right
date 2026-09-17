@@ -10,7 +10,7 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 2. **One request at a time,** at least 3 s apart plus up to 1 s random jitter (`ToriClient`).
 3. **Honest user agent:** `priced-right/0.1 (student data science project; non-commercial)`. Tori serves it normally.
 4. **Plain HTTP, no browser.** Pages are rendered on the server with the data embedded as JSON; responses take ~0.3 s.
-5. **Data minimization at collection time:** records keep only the fields in [data-dictionary.md](data-dictionary.md). Phone numbers and emails in descriptions are scrubbed before writing, and forbidden keys (seller ID, coordinates, images, …) fail the run.
+5. **Data minimization at collection time:** records keep only the fields in [data-dictionary.md](data-dictionary.md). Contact details in titles and descriptions are scrubbed before writing (links to personal pages and social profiles, emails, Finnish phone numbers including WhatsApp links, and any other 9–12 digit number), and forbidden keys (seller ID, coordinates, images, …) fail the run.
 6. **Storage:** minimized records go to `data/raw/tori/<run>/` and are committed so the group shares one dataset. Descriptions are scrubbed of phone numbers and emails but can still mention names, so the repository must stay private.
 
 ## Tori.fi: how the site exposes data
@@ -55,10 +55,32 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 - Accessories and spare parts (cases, screen protectors, back covers) are listed under the Apple phone brand, e.g. 9 € "silikonikuori". A title heuristic flags 83 listings (4%). Filter them in preprocessing.
 - 8 listings are at 0 €, mostly swap offers ("Vaihdetaan").
 - Retailers are 20% of listings (Elisa, Multitronic, …), with a median of 340 € vs. 200 € for private sellers. The first 129-listing sample overstated them at 40%.
-- 150 descriptions (7%) contained a phone number or email, now scrubbed.
+- 154 descriptions (7%) contained contact details, now scrubbed. See [Privacy validation](#privacy-validation).
 - Sellers leave fields empty: model group 22%, memory 12%, condition 4%.
-- 3 Samsung Galaxy listings are filed under brand Apple.
+- 3 listings have a Galaxy model group: 1 is a real Samsung phone (drop it); 2 are iPhones (XR, 4) that a seller mis-tagged (relabel them from the title).
 - 8 listings were removed (HTTP 404) and 9 went inactive between the search pass and the listing pass.
+
+### Privacy validation
+
+A scan of the full run on 2026-09-17 found **10 contact numbers the first scrubber missed** (3 from private sellers, 7 from shops):
+
+- 8 written as `358…` without a plus, mostly WhatsApp links (`https://wa.me/358…`)
+- 2 in other formats: a foreign number and an obfuscated one (`x401234567`)
+
+The scrubber was extended (`_PHONE_RE`, a catch-all `_LONG_NUMBER_RE`, and `_PERSONAL_LINK_RE` for personal sites and social profiles in `tori.py`), with unit cases that keep prices, dates, 15-digit IMEIs and shop links intact. The saved data was then re-scrubbed offline, without new requests, and `listings.csv` and the summary were rebuilt; both steps are logged in the run's `collect.log`. A final scan finds no phone numbers, WhatsApp links, emails or 9–12 digit runs in titles or descriptions.
+
+- **Raw data exception:** `data/raw/` is otherwise never edited after collection; a privacy fix is the one allowed exception.
+- **Git history:** the earlier commit `dad9a23` still contains the missed numbers. The repository is private, so history was not rewritten.
+- **Addresses and links:** all 47 street addresses are shops'. Of 141 descriptions with links, 133 are shops'; the 8 from private sellers point to product pages (Verkkokauppa, Apple support, GSMArena) and a news article, except one link to a seller's personal website, which was masked as `[url]`.
+- **Still private:** descriptions can mention first names, so the repository must stay private.
+
+## Legal and ethical context
+
+Background for the report, not legal advice:
+
+- **Copyright / database rights:** the EU text and data mining exceptions (DSM Directive Art. 3 for research organisations, Art. 4 for everyone else) respect machine-readable opt-outs such as robots.txt, which the collector checks at the start of every run ([COMMUNIA](https://communia-association.org/wp-content/uploads/2020/07/Webinar-Presentation-TDM-A.34.pdf), [IAPP](https://iapp.org/news/a/the-state-of-web-scraping-in-the-eu)).
+- **GDPR applies separately** to any personal data in scraped text. The EDPB's [Guidelines 03/2026 on web scraping](https://www.edpb.europa.eu/news/edpb-sheds-light-on-anonymisation-and-web-scraping-for-generative-ai-and-adopts-final-version_en) (July 2026, written for generative AI but applicable in spirit) stress deciding what is necessary before collecting, designing the crawler for data minimisation, and validating collected data. That matches the field allowlist, forbidden-key check and the privacy validation above.
+- **Terms of service:** Tori's terms restrict systematic collection without written permission; the group relies on the course supervisor's approval (see the README).
 
 ## Collection runs
 
@@ -70,7 +92,7 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 
 Everything lands in `data/raw/tori/iphones_<timestamp>/` (committed; about 5 MB per full run). The aggregate summary and report go to `docs/runs/iphones_<timestamp>.json` and `.md`.
 
-**Pause and resume:** press Ctrl-C in the collector's terminal, or run `kill <pid>` from another one. Each record is saved as soon as it's fetched, and a pause also writes `listings.csv` and the summary for the listings so far. The run also stops by itself on HTTP 403 or 429, or after 5 consecutive errors. Timeouts and connection errors skip the listing without marking it done, so a resume retries it. Continue with:
+**Pause and resume:** press Ctrl-C in the collector's terminal, or run `kill <pid>` from another one. Each record is saved as soon as it's fetched, and a pause also writes `listings.csv` and the summary for the listings so far. The run also stops by itself on HTTP 403 or 429, or after 5 consecutive errors. Removed listings (HTTP 404/410) are recorded in `failures.jsonl` and not retried. Timeouts, connection errors and server errors (5xx) skip the listing without marking it done, so a resume retries it. Continue with:
 
 ```bash
 python3 -m priced_right.collect_iphones --resume data/raw/tori/iphones_<timestamp>

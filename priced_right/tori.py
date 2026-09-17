@@ -53,7 +53,17 @@ _ITEM_STATE_RE = re.compile(
     r'window\.__staticRouterHydrationData = JSON\.parse\((".*?")\);?\s*</script>', re.S
 )
 _EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
-_PHONE_RE = re.compile(r"(?<!\d)(?:\+358|00358|0)[\s-]?\d{1,3}(?:[\s-]?\d{2,4}){2,3}(?!\d)")
+# Finnish phone numbers: 040…, +358…, 00358…, and 358… without a plus (e.g. wa.me/358… WhatsApp links).
+# An unbroken run too long for a phone number (e.g. a 15-digit IMEI) does not match.
+_PHONE_RE = re.compile(r"(?<!\d)(?:00358|\+?358(?!\d{10})|0(?!\d{11}))[\s-]?\d{1,3}(?:[\s-]?\d{2,4}){2,3}(?!\d)")
+# Catch-all for other contact numbers (foreign formats, obfuscated like "x401234567"): any run of
+# 9-12 digits with optional single spaces or hyphens. Unbroken 15-digit IMEIs do not match.
+_LONG_NUMBER_RE = re.compile(r"(?<![\d.,])\d(?:[ -]?\d){8,11}(?![\d.,])")
+# Links to personal pages a seller controls (site builders, social profiles, link-in-bio, Telegram).
+_PERSONAL_LINK_RE = re.compile(
+    r"(?:https?://)?(?:www\.)?(?:[\w-]+\.(?:my\.canva\.site|wixsite\.com|carrd\.co)|(?:linktr\.ee|facebook\.com|fb\.com|instagram\.com|tiktok\.com|t\.me)/)\S*",
+    re.I,
+)
 
 
 # Heuristic only: titles that look like accessories or spare parts rather than phones.
@@ -207,10 +217,15 @@ def filter_values(search_state: Dict[str, Any], names: Tuple[str, ...]) -> Dict[
 
 
 def scrub_pii(text: str) -> Tuple[str, int]:
-    """Replace email addresses and Finnish phone numbers. Returns (text, replacements)."""
+    """Replace personal links, emails, Finnish phone numbers (including WhatsApp links) and other long digit runs.
+
+    Returns (text, replacements). Placeholders: [url], [email], [phone], [number].
+    """
+    text, links = _PERSONAL_LINK_RE.subn("[url]", text)
     text, emails = _EMAIL_RE.subn("[email]", text)
     text, phones = _PHONE_RE.subn("[phone]", text)
-    return text, emails + phones
+    text, numbers = _LONG_NUMBER_RE.subn("[number]", text)
+    return text, links + emails + phones + numbers
 
 
 def search_doc_to_record(doc: Dict[str, Any], collected_at: str) -> Dict[str, Any]:
@@ -219,7 +234,7 @@ def search_doc_to_record(doc: Dict[str, Any], collected_at: str) -> Dict[str, An
     location = doc.get("location") or ""
     return {
         "listing_id": str(doc["id"]),
-        "title": doc.get("heading"),
+        "title": scrub_pii(doc.get("heading") or "")[0] or None,
         "price_eur": price.get("amount") if price.get("currency_code") == "EUR" else None,
         "memory": doc.get("memory_size"),
         "municipality": location.rsplit(",", 1)[-1].strip() or None,

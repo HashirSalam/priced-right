@@ -20,6 +20,7 @@ dependencies = [
     "matplotlib>=3.9",
     "seaborn>=0.13",
     "flask>=3.0",
+    "mapie>=1.0",
 ]
 
 [project.optional-dependencies]
