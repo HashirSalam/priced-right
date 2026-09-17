@@ -1,0 +1,35 @@
+{
+  "urls": ["https://www.tori.fi/recommerce/forsale/item/45132336"],
+  "crawler_config": {
+    "type": "CrawlerRunConfig",
+    "params": {
+      "cache_mode": "bypass",
+      "flatten_shadow_dom": true,
+      "page_timeout": 60000,
+      "extraction_strategy": {
+        "type": "JsonCssExtractionStrategy",
+        "params": {
+          "schema": {
+            "type": "dict",
+            "value": {
+              "name": "ToriListing",
+              "baseSelector": "body",
+              "fields": [
+                {"name": "title",       "selector": "h1[data-testid='object-title']", "type": "text"},
+                {"name": "price",       "selector": "section[aria-label='Tee ostotarjous'] .h2", "type": "text"},
+                {"name": "attributes",  "selector": "section[aria-label='Lisätietoja'] p", "type": "list",
+                  "fields": [{"name": "text", "type": "text"}]},
+                {"name": "description", "selector": "section[data-testid='description'] .whitespace-pre-wrap", "type": "text"},
+                {"name": "location",    "selector": "a[data-testid='map-link']", "type": "attribute", "attribute": "aria-label"},
+                {"name": "map_url",     "selector": "a[data-testid='map-link']", "type": "attribute", "attribute": "href"},
+                {"name": "listing_info","selector": "section[data-testid='object-info'] p", "type": "text"},
+                {"name": "images",      "selector": "img[alt='Pikkukuva']", "type": "list",
+                  "fields": [{"name": "src", "type": "attribute", "attribute": "src"}]}
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
