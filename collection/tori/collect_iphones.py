@@ -21,8 +21,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import http.client
 import json
-import random
+import signal
 import statistics
 import sys
 import urllib.error
@@ -46,7 +47,15 @@ CSV_COLUMNS = [
 
 
 def read_jsonl(path: Path) -> List[Dict[str, Any]]:
-    return [json.loads(line) for line in path.open()] if path.exists() else []
+    """Read records, skipping a line cut short if the run was killed mid-write."""
+    records = []
+    if path.exists():
+        for line in path.open():
+            try:
+                records.append(json.loads(line))
+            except json.JSONDecodeError:
+                pass
+    return records
 
 
 def append_jsonl(path: Path, record: Dict[str, Any]) -> None:
@@ -128,7 +137,8 @@ def item_pass(client: tori.ToriClient, run_dir: Path, collected_at: str, listing
                 raise StopCollection(f"HTTP {error.code} on listing {listing_id}; stopping to respect the site")
             append_jsonl(failures_path, {"listing_id": listing_id, "reason": f"http_{error.code}"})
             consecutive_errors = 0 if error.code in (404, 410) else consecutive_errors + 1
-        except (urllib.error.URLError, TimeoutError, ValueError, KeyError) as error:
+        except (OSError, http.client.HTTPException, ValueError, KeyError) as error:
+            # OSError covers URLError and, on Python 3.9, socket.timeout during read.
             consecutive_errors += 1
             log(run_dir, f"error on {listing_id}: {type(error).__name__}: {error}")
             if consecutive_errors >= MAX_CONSECUTIVE_ERRORS:
@@ -259,6 +269,9 @@ def main() -> None:
         run_dir = RAW_DIR / ("iphones_" + collected_at.replace(":", "").replace("+0000", "Z"))
         run_dir.mkdir(parents=True, exist_ok=False)
         (run_dir / "run.json").write_text(json.dumps({"collected_at": collected_at, "query": tori.IPHONE_SEARCH, "delay_seconds": args.delay}, indent=2) + "\n")
+
+    # `kill <pid>` pauses as cleanly as Ctrl-C: progress is written and --resume continues.
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
 
     client = tori.ToriClient(delay_seconds=args.delay)
     robots = client.robots()
