@@ -12,6 +12,7 @@ import json
 import random
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -77,13 +78,17 @@ class ToriClient:
             time.sleep(wait)
         request = urllib.request.Request(url, headers={"User-Agent": self.user_agent, "Accept-Language": "fi,en;q=0.8"})
         started = time.monotonic()
+        status, body = None, b""
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
                 body = response.read()
                 status = response.status
+        except urllib.error.HTTPError as error:
+            status = error.code
+            raise
         finally:
             self._last_request_at = time.monotonic()
-        self.request_log.append({"url": url, "status": status, "seconds": round(self._last_request_at - started, 3), "bytes": len(body)})
+            self.request_log.append({"url": url, "status": status, "seconds": round(self._last_request_at - started, 3), "bytes": len(body)})
         return body.decode("utf-8")
 
     def robots(self) -> "RobotsRules":
