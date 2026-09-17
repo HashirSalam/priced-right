@@ -1,0 +1,43 @@
+2026-09-17T11:02:02+00:00 search: match_count=2195 pages=42 fetching=42
+2026-09-17T11:02:39+00:00 search page 10/42: 530 unique listings
+2026-09-17T11:03:20+00:00 search page 20/42: 1060 unique listings
+2026-09-17T11:04:01+00:00 search page 30/42: 1590 unique listings
+2026-09-17T11:04:40+00:00 search page 40/42: 2120 unique listings
+2026-09-17T11:04:48+00:00 search page 42/42: 2195 unique listings
+2026-09-17T11:04:48+00:00 search pass done: 2195 unique listings, 0 seen on two pages
+2026-09-17T11:04:48+00:00 listing pass: 0 already done, 2195 to fetch
+2026-09-17T11:11:14+00:00 listing 100/2195
+2026-09-17T11:12:24+00:00 error on 47215164: URLError: <urlopen error timed out>
+2026-09-17T11:14:40+00:00 error on 47213717: URLError: <urlopen error timed out>
+2026-09-17T11:15:19+00:00 error on 47212272: URLError: <urlopen error timed out>
+2026-09-17T11:17:55+00:00 interrupted; rerun with --resume to continue
+2026-09-17T11:17:55+00:00 wrote 156 listings to data/raw/tori/iphones_2026-09-17T110158Z/listings.csv
+2026-09-17T11:18:24+00:00 search pass already done: 2195 records
+2026-09-17T11:18:24+00:00 listing pass: 156 already done, 2039 to fetch
+2026-09-17T11:25:02+00:00 listing 100/2039
+2026-09-17T11:31:15+00:00 listing 200/2039
+2026-09-17T11:37:33+00:00 listing 300/2039
+2026-09-17T11:43:57+00:00 listing 400/2039
+2026-09-17T11:50:06+00:00 listing 500/2039
+2026-09-17T11:56:21+00:00 listing 600/2039
+2026-09-17T12:02:36+00:00 listing 700/2039
+2026-09-17T12:08:47+00:00 listing 800/2039
+2026-09-17T12:14:59+00:00 listing 900/2039
+2026-09-17T12:21:13+00:00 listing 1000/2039
+2026-09-17T12:27:22+00:00 listing 1100/2039
+2026-09-17T12:33:43+00:00 listing 1200/2039
+2026-09-17T12:39:57+00:00 listing 1300/2039
+2026-09-17T12:46:11+00:00 listing 1400/2039
+2026-09-17T12:48:06+00:00 error on 45482797: URLError: <urlopen error timed out>
+2026-09-17T12:53:04+00:00 listing 1500/2039
+2026-09-17T12:59:19+00:00 listing 1600/2039
+2026-09-17T13:05:30+00:00 listing 1700/2039
+2026-09-17T13:11:47+00:00 listing 1800/2039
+2026-09-17T13:18:00+00:00 listing 1900/2039
+2026-09-17T13:24:16+00:00 listing 2000/2039
+2026-09-17T13:26:39+00:00 listing 2039/2039
+2026-09-17T13:26:39+00:00 wrote 2177 listings to data/raw/tori/iphones_2026-09-17T110158Z/listings.csv
+2026-09-17T13:27:04+00:00 search pass already done: 2195 records
+2026-09-17T13:27:04+00:00 listing pass: 2194 already done, 1 to fetch
+2026-09-17T13:27:07+00:00 listing 1/1
+2026-09-17T13:27:07+00:00 wrote 2178 listings to data/raw/tori/iphones_2026-09-17T110158Z/listings.csv

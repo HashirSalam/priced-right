@@ -98,7 +98,7 @@ priced-right/
 │   ├── data-collection-notes.md     crawler rules and how Tori exposes its data
 │   └── runs/                        generated report for every run (committed)
 │
-└── data/                            collected data (git-ignored, created by the collector)
+└── data/                            collected data (committed; created by the collector)
     └── raw/tori/iphones_<time>/     records, listings.csv, failures, log
 ```
 
@@ -114,7 +114,7 @@ flowchart LR
         progress["progress.py"]
     end
 
-    subgraph datadir["data/ · git-ignored"]
+    subgraph datadir["data/ · committed"]
         raw["raw/tori/iphones_…/<br/>listings.csv"]
     end
 
@@ -137,8 +137,10 @@ flowchart LR
 
 Add folders only when there is something to put in them (e.g. `notebooks/` for EDA).
 
-`data/` is gitignored. Three weeks of daily snapshots runs to hundreds of megabytes and the
-raw files are reproducible from the collector.
+`data/` is committed so the whole group works from the same dataset. Listing descriptions are
+free text written by sellers, so **the repository must stay private**. A full iPhone run is about
+5 MB; three weeks of daily snapshots would run to hundreds of megabytes, so revisit this before
+daily collection starts.
 
 ## Data collection
 

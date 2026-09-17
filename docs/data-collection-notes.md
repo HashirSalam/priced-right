@@ -11,7 +11,7 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 3. **Honest user agent:** `priced-right/0.1 (student data science project; non-commercial)`. Tori serves it normally.
 4. **Plain HTTP, no browser.** Pages are rendered on the server with the data embedded as JSON; responses take ~0.3 s.
 5. **Data minimization at collection time:** records keep only the fields in [data-dictionary.md](data-dictionary.md). Phone numbers and emails in descriptions are scrubbed before writing, and forbidden keys (seller ID, coordinates, images, …) fail the run.
-6. **Storage:** minimized records go to `data/raw/tori/<run>/` (git-ignored). Only aggregate outputs are committed.
+6. **Storage:** minimized records go to `data/raw/tori/<run>/` and are committed so the group shares one dataset. Descriptions are scrubbed of phone numbers and emails but can still mention names, so the repository must stay private.
 
 ## Tori.fi: how the site exposes data
 
@@ -50,12 +50,15 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 - **Size:** a full pass adds **~2,200 requests (~2 h at 3–4 s)**.
 - **Cheaper alternative:** condition and model bucket can instead come from filtered search queries (`&condition=N`, `&mobile_model=N`, ~90 requests). That loses the description and region; region could then be mapped from municipality.
 
-### Data quality seen so far
+### Data quality (full run, 2,178 listings)
 
-- Accessories and spare parts (cases, screen protectors, back covers) are listed under the Apple phone brand, e.g. 9 € "silikonikuori". A title heuristic flagged 2 of 129 in one sample and 6 of 225 in another. Filter them in preprocessing.
-- 0 € listings are swap offers ("Vaihdetaan").
-- Retailers made up 40% of listings in the sample (Elisa, Multitronic, …).
-- Some descriptions contain phone numbers (1 of 10 sampled).
+- Accessories and spare parts (cases, screen protectors, back covers) are listed under the Apple phone brand, e.g. 9 € "silikonikuori". A title heuristic flags 83 listings (4%). Filter them in preprocessing.
+- 8 listings are at 0 €, mostly swap offers ("Vaihdetaan").
+- Retailers are 20% of listings (Elisa, Multitronic, …), with a median of 340 € vs. 200 € for private sellers. The first 129-listing sample overstated them at 40%.
+- 150 descriptions (7%) contained a phone number or email, now scrubbed.
+- Sellers leave fields empty: model group 22%, memory 12%, condition 4%.
+- 3 Samsung Galaxy listings are filed under brand Apple.
+- 8 listings were removed (HTTP 404) and 9 went inactive between the search pass and the listing pass.
 
 ## Collection runs
 
@@ -65,7 +68,7 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 2. **Listing pass:** one listing page per result goes to `item_records.jsonl`. Inactive or removed listings go to `failures.jsonl` with a reason.
 3. **Join:** `listings.csv` contains one row per listing with both records, using the columns in [data-dictionary.md](data-dictionary.md). This is the input for preprocessing.
 
-Everything lands in `data/raw/tori/iphones_<timestamp>/` (git-ignored). The aggregate summary and report are committed as `docs/runs/iphones_<timestamp>.json` and `.md`.
+Everything lands in `data/raw/tori/iphones_<timestamp>/` (committed; about 5 MB per full run). The aggregate summary and report go to `docs/runs/iphones_<timestamp>.json` and `.md`.
 
 **Pause and resume:** press Ctrl-C in the collector's terminal, or run `kill <pid>` from another one. Each record is saved as soon as it's fetched, and a pause also writes `listings.csv` and the summary for the listings so far. The run also stops by itself on HTTP 403 or 429, or after 5 consecutive errors. Timeouts and connection errors skip the listing without marking it done, so a resume retries it. Continue with:
 
@@ -91,6 +94,7 @@ python3 -m priced_right.collect_iphones --max-pages 1 --max-items 5 --no-commit-
 
 | Run | Listings | Report |
 |---|---|---|
+| `iphones_2026-09-17T110158Z` | 2,178 (2,195 found; 17 removed or inactive during the run) | [report](runs/iphones_2026-09-17T110158Z.md), [summary](runs/iphones_2026-09-17T110158Z.json), data: `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` |
 
 ## Crawl4AI (Docker)
 

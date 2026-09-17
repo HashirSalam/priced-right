@@ -1,0 +1,201 @@
+{
+  "match_count": 2195,
+  "last_page": 42,
+  "pages_fetched": 42,
+  "filters": {
+    "mobile_model": [
+      {
+        "label": "Galaxy A -sarja",
+        "param": "mobile_model",
+        "value": "12",
+        "hits": 2
+      },
+      {
+        "label": "Galaxy S1-S19",
+        "param": "mobile_model",
+        "value": "8",
+        "hits": 0
+      },
+      {
+        "label": "Galaxy S20-S22",
+        "param": "mobile_model",
+        "value": "9",
+        "hits": 0
+      },
+      {
+        "label": "Galaxy S23/Plus/Ultra",
+        "param": "mobile_model",
+        "value": "10",
+        "hits": 0
+      },
+      {
+        "label": "Galaxy S24/Plus/Ultra",
+        "param": "mobile_model",
+        "value": "11",
+        "hits": 0
+      },
+      {
+        "label": "Galaxy S25/Plus/Ultra",
+        "param": "mobile_model",
+        "value": "3677",
+        "hits": 0
+      },
+      {
+        "label": "Galaxy S26/Plus/Ultra",
+        "param": "mobile_model",
+        "value": "3678",
+        "hits": 0
+      },
+      {
+        "label": "Galaxy Z -sarja (flip/fold)",
+        "param": "mobile_model",
+        "value": "13",
+        "hits": 1
+      },
+      {
+        "label": "iPhone 12/Mini/Plus/Pro/Max",
+        "param": "mobile_model",
+        "value": "3",
+        "hits": 293
+      },
+      {
+        "label": "iPhone 13/Mini/Plus/Pro/Max",
+        "param": "mobile_model",
+        "value": "4",
+        "hits": 328
+      },
+      {
+        "label": "iPhone 14/Mini/Plus/Pro/Max",
+        "param": "mobile_model",
+        "value": "5",
+        "hits": 187
+      },
+      {
+        "label": "iPhone 15/Plus/Pro/Max",
+        "param": "mobile_model",
+        "value": "6",
+        "hits": 215
+      },
+      {
+        "label": "iPhone 16/Plus/Pro/Max",
+        "param": "mobile_model",
+        "value": "7",
+        "hits": 195
+      },
+      {
+        "label": "iPhone 17/Air/Pro/Max",
+        "param": "mobile_model",
+        "value": "3066",
+        "hits": 121
+      },
+      {
+        "label": "iPhone 2G-11",
+        "param": "mobile_model",
+        "value": "1",
+        "hits": 277
+      },
+      {
+        "label": "iPhone SE (2-3 gen)",
+        "param": "mobile_model",
+        "value": "2",
+        "hits": 96
+      }
+    ],
+    "mobile_memory_size": [
+      {
+        "label": "16 GB",
+        "param": "mobile_memory_size",
+        "value": "1",
+        "hits": 31
+      },
+      {
+        "label": "32 GB",
+        "param": "mobile_memory_size",
+        "value": "2",
+        "hits": 58
+      },
+      {
+        "label": "64 GB",
+        "param": "mobile_memory_size",
+        "value": "3",
+        "hits": 463
+      },
+      {
+        "label": "128 GB",
+        "param": "mobile_memory_size",
+        "value": "4",
+        "hits": 805
+      },
+      {
+        "label": "256 GB",
+        "param": "mobile_memory_size",
+        "value": "5",
+        "hits": 364
+      },
+      {
+        "label": "512 GB",
+        "param": "mobile_memory_size",
+        "value": "6",
+        "hits": 54
+      },
+      {
+        "label": "1 TB",
+        "param": "mobile_memory_size",
+        "value": "1318",
+        "hits": 14
+      },
+      {
+        "label": "Muu",
+        "param": "mobile_memory_size",
+        "value": "7",
+        "hits": 144
+      }
+    ],
+    "condition": [
+      {
+        "label": "Uusi",
+        "param": "condition",
+        "value": "1",
+        "hits": 170
+      },
+      {
+        "label": "Kuin uusi",
+        "param": "condition",
+        "value": "2",
+        "hits": 720
+      },
+      {
+        "label": "Hyvä",
+        "param": "condition",
+        "value": "3",
+        "hits": 997
+      },
+      {
+        "label": "Kohtalainen",
+        "param": "condition",
+        "value": "4",
+        "hits": 161
+      },
+      {
+        "label": "Vaatii korjausta",
+        "param": "condition",
+        "value": "5",
+        "hits": 67
+      }
+    ],
+    "dealer_segment": [
+      {
+        "label": "Yksityinen",
+        "param": "dealer_segment",
+        "value": "1",
+        "hits": 1755
+      },
+      {
+        "label": "Yritys",
+        "param": "dealer_segment",
+        "value": "3",
+        "hits": 440
+      }
+    ]
+  }
+}

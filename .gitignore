@@ -1,5 +1,5 @@
-# Data (may contain personal information before cleaning)
-data/
+# data/ is committed so the group shares one dataset. Listing descriptions are
+# free text written by sellers, so this repository must stay private.
 
 # Secrets
 .env
