@@ -68,7 +68,7 @@ source .venv/bin/activate
 pip install -e ".[notebook,dev]"
 ```
 
-This installs the project in editable mode, so `import collection` and `import priced_right` work from notebooks, scripts and the app. The optional extras are `notebook` (JupyterLab) and `dev` (pytest, ruff).
+This installs the project in editable mode, so `import priced_right` works from notebooks, scripts and the app. The optional extras are `notebook` (JupyterLab) and `dev` (pytest, ruff).
 
 To get the exact versions the group uses, install from the lock file:
 
@@ -79,21 +79,68 @@ pip install -e . --no-deps
 
 After adding or upgrading a dependency in `pyproject.toml`, refresh the lock file with `pip freeze --exclude-editable > requirements-lock.txt` and commit both files.
 
-## Layout
+## Project structure
 
 ```
-collection/      scrapers, API clients and collection experiments (collection/tori)
-data/raw/        raw JSON as collected (not committed)
-data/processed/  tidy, versioned CSVs (not committed)
-notebooks/       EDA and modelling experiments
-src/priced_right/ preprocessing, features, models (pipeline reused by the app)
-app/             Flask web app
-reports/         figures, report, presentation
-docs/            project canvas, data dictionary, data collection notes
+priced-right/
+├── README.md                        overview, setup, collection policy
+├── pyproject.toml                   dependencies and package config
+├── requirements-lock.txt            exact package versions for the group
+│
+├── priced_right/                    all Python code, one package
+│   ├── tori.py                      Tori client: requests, robots.txt, parsing, privacy filter
+│   ├── collect_iphones.py           full iPhone collection (search + listing pages)
+│   └── progress.py                  live progress of a running collection
+│
+├── docs/
+│   ├── project-canvas.md            the mini project canvas
+│   ├── data-dictionary.md           fields we collect, why, and what we leave out
+│   ├── data-collection-notes.md     crawler rules and how Tori exposes its data
+│   └── runs/                        generated report for every run (committed)
+│
+└── data/                            collected data (committed; created by the collector)
+    └── raw/tori/iphones_<time>/     records, listings.csv, failures, log
 ```
 
-`data/` is gitignored. Three weeks of daily snapshots runs to hundreds of megabytes and the
-raw files are reproducible from the collector.
+How the pieces fit together:
+
+```mermaid
+flowchart LR
+    tori[("Tori.fi")]
+
+    subgraph pkg["priced_right/"]
+        client["tori.py<br/>requests · robots.txt<br/>parsing · privacy filter"]
+        collect["collect_iphones.py"]
+        progress["progress.py"]
+    end
+
+    subgraph datadir["data/ · committed"]
+        raw["raw/tori/iphones_…/<br/>listings.csv"]
+    end
+
+    subgraph runs["docs/runs/ · committed"]
+        reports["run reports<br/>.md + .json"]
+    end
+
+    planned["preprocessing → models → Flask app<br/>(planned)"]
+
+    tori -- "search + listing pages" --> client
+    client --> collect
+    collect -- "minimized records" --> raw
+    collect -- "aggregate summary" --> reports
+    raw -. "watches" .-> progress
+    raw -.-> planned
+
+    classDef todo stroke-dasharray: 5 5
+    class planned todo
+```
+
+Add folders only when there is something to put in them (e.g. `notebooks/` for EDA).
+
+`data/` is committed so the whole group works from the same dataset. Listing descriptions are
+free text written by sellers, so **the repository must stay private**. A full iPhone run is about
+5 MB; three weeks of daily snapshots would run to hundreds of megabytes, so revisit this before
+daily collection starts.
 
 ## Data collection
 
@@ -110,16 +157,10 @@ carry: graded condition, model, storage, description, postal code and region. Th
 change after a listing is posted, so each listing is fetched exactly once and cached; repeat
 runs only pay for listings that appeared since the last pass.
 
-Run from the repo root. The collection code uses only the standard library and also runs on Python 3.9:
+Run from the repo root. The collection code uses only the standard library and also runs on Python 3.9. A full iPhone collection (~2 h) writes `data/raw/tori/iphones_<timestamp>/listings.csv`:
 
 ```bash
-python3 -m collection.tori.exp01_feasibility
-```
-
-That is the small feasibility test. The full iPhone collection (~2 h) writes `data/raw/tori/iphones_<timestamp>/listings.csv`:
-
-```bash
-python3 -m collection.tori.collect_iphones
+python3 -m priced_right.collect_iphones
 ```
 
 ## Why the daily cadence matters

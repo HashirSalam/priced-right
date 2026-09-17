@@ -4,14 +4,14 @@
 
 ## Tori.fi: crawler rules
 
-Rules the collector follows, all implemented in [`collection/tori/tori.py`](../collection/tori/tori.py):
+Rules the collector follows, all implemented in [`priced_right/tori.py`](../priced_right/tori.py):
 
 1. **robots.txt:** only `/recommerce/forsale/search` and `/recommerce/forsale/item/*` are fetched. Tori disallows `/map*`, `/profile*`, `/messages*`, `/contact/*`, `/report/*` and account pages. Python's `urllib.robotparser` ignores `*` wildcards and wrongly allows `/profile*` and `/map*`, so `RobotsRules` implements the matching itself (longest match wins).
 2. **One request at a time,** at least 3 s apart plus up to 1 s random jitter (`ToriClient`).
 3. **Honest user agent:** `priced-right/0.1 (student data science project; non-commercial)`. Tori serves it normally.
 4. **Plain HTTP, no browser.** Pages are rendered on the server with the data embedded as JSON; responses take ~0.3 s.
 5. **Data minimization at collection time:** records keep only the fields in [data-dictionary.md](data-dictionary.md). Phone numbers and emails in descriptions are scrubbed before writing, and forbidden keys (seller ID, coordinates, images, …) fail the run.
-6. **Storage:** minimized records go to `data/raw/tori/<run>/` (git-ignored). Only aggregate outputs are committed.
+6. **Storage:** minimized records go to `data/raw/tori/<run>/` and are committed so the group shares one dataset. Descriptions are scrubbed of phone numbers and emails but can still mention names, so the repository must stay private.
 
 ## Tori.fi: how the site exposes data
 
@@ -27,7 +27,11 @@ Rules the collector follows, all implemented in [`collection/tori/tori.py`](../c
 | `sort` | `PUBLISHED_DESC` | Newest first, which keeps page order stable. Others: `PRICE_ASC`, `PRICE_DESC`, `RELEVANCE`, `PUBLISHED_ASC`, `CLOSEST` |
 | `page` | 1…`metadata.paging.last` | 53 results per page; Tori caps paging at page 50 (~2,650 results per query) |
 | `condition` | `1`–`5` | Uusi, Kuin uusi, Hyvä, Kohtalainen, Vaatii korjausta |
-| `mobile_model` | e.g. `6` | iPhone 15/Plus/Pro/Max. All values: [filters.json](../collection/tori/output/exp01_feasibility/filters.json) |
+| `mobile_model` | see below | iPhone model group |
+| `mobile_memory_size` | `1`–`7`, `1318` | 16, 32, 64, 128, 256, 512 GB, `7` Muu (other), `1318` 1 TB |
+| `dealer_segment` | `1`, `3` | Yksityinen (private), Yritys (business) |
+
+`mobile_model` values for iPhones: `1` iPhone 2G-11, `2` iPhone SE (2-3 gen), `3` iPhone 12/Mini/Plus/Pro/Max, `4` iPhone 13/Mini/Plus/Pro/Max, `5` iPhone 14/Mini/Plus/Pro/Max, `6` iPhone 15/Plus/Pro/Max, `7` iPhone 16/Plus/Pro/Max, `3066` iPhone 17/Air/Pro/Max. Each run also saves the current filter values and hit counts in `data/raw/tori/<run>/search_meta.json`.
 
 - **Data location:** `<script type="application/json" data-react-query-state>` holds **base64-encoded** JSON. The query whose key has `scope: "search"` contains `docs` (listings), `filters` (options with hit counts) and `metadata` (`result_size.match_count`, `paging`).
 - **Per listing:** `id`, `heading`, `price.amount` + `currency_code`, `location` ("district, municipality"), `timestamp` (ms, published or renewed), `memory_size`, `brand`, `flags` (`private` / `retailer`, `shipping_exists`, `buy_now`), and image and coordinate fields we drop.
@@ -46,35 +50,30 @@ Rules the collector follows, all implemented in [`collection/tori/tori.py`](../c
 - **Size:** a full pass adds **~2,200 requests (~2 h at 3–4 s)**.
 - **Cheaper alternative:** condition and model bucket can instead come from filtered search queries (`&condition=N`, `&mobile_model=N`, ~90 requests). That loses the description and region; region could then be mapped from municipality.
 
-### Data quality seen so far
+### Data quality (full run, 2,178 listings)
 
-- Accessories and spare parts (cases, screen protectors, back covers) are listed under the Apple phone brand, e.g. 9 € "silikonikuori". A title heuristic flagged 2 of 129 in one sample and 6 of 225 in another. Filter them in preprocessing.
-- 0 € listings are swap offers ("Vaihdetaan").
-- Retailers made up 40% of listings in the sample (Elisa, Multitronic, …).
-- Some descriptions contain phone numbers (1 of 10 sampled).
-
-## Experiments
-
-| # | Script | Question | Output |
-|---|---|---|---|
-| 01 | `python3 -m collection.tori.exp01_feasibility` | Can we collect iPhones, and which fields are available? | [report](../collection/tori/output/exp01_feasibility/report.md), [summary.json](../collection/tori/output/exp01_feasibility/summary.json), [filters.json](../collection/tori/output/exp01_feasibility/filters.json) |
-
-Run from the repo root. The code uses only the standard library and needs Python 3.9 or newer.
+- Accessories and spare parts (cases, screen protectors, back covers) are listed under the Apple phone brand, e.g. 9 € "silikonikuori". A title heuristic flags 83 listings (4%). Filter them in preprocessing.
+- 8 listings are at 0 €, mostly swap offers ("Vaihdetaan").
+- Retailers are 20% of listings (Elisa, Multitronic, …), with a median of 340 € vs. 200 € for private sellers. The first 129-listing sample overstated them at 40%.
+- 150 descriptions (7%) contained a phone number or email, now scrubbed.
+- Sellers leave fields empty: model group 22%, memory 12%, condition 4%.
+- 3 Samsung Galaxy listings are filed under brand Apple.
+- 8 listings were removed (HTTP 404) and 9 went inactive between the search pass and the listing pass.
 
 ## Collection runs
 
-`python3 -m collection.tori.collect_iphones` collects every for-sale iPhone listing:
+`python3 -m priced_right.collect_iphones` collects every for-sale iPhone listing. Run it from the repo root; the code uses only the standard library and needs Python 3.9 or newer.
 
 1. **Search pass:** all result pages go to `search_records.jsonl`. Listings shift between pages while new ones are published, so records are deduplicated by `listing_id`.
 2. **Listing pass:** one listing page per result goes to `item_records.jsonl`. Inactive or removed listings go to `failures.jsonl` with a reason.
 3. **Join:** `listings.csv` contains one row per listing with both records, using the columns in [data-dictionary.md](data-dictionary.md). This is the input for preprocessing.
 
-Everything lands in `data/raw/tori/iphones_<timestamp>/` (git-ignored). The aggregate `summary.json` and `report.md` are committed under `collection/tori/output/collect_iphones/<run>/`.
+Everything lands in `data/raw/tori/iphones_<timestamp>/` (committed; about 5 MB per full run). The aggregate summary and report go to `docs/runs/iphones_<timestamp>.json` and `.md`.
 
 **Pause and resume:** press Ctrl-C in the collector's terminal, or run `kill <pid>` from another one. Each record is saved as soon as it's fetched, and a pause also writes `listings.csv` and the summary for the listings so far. The run also stops by itself on HTTP 403 or 429, or after 5 consecutive errors. Timeouts and connection errors skip the listing without marking it done, so a resume retries it. Continue with:
 
 ```bash
-python3 -m collection.tori.collect_iphones --resume data/raw/tori/iphones_<timestamp>
+python3 -m priced_right.collect_iphones --resume data/raw/tori/iphones_<timestamp>
 ```
 
 A resume reuses the listing IDs from the original search pass. Over a long pause, sold listings get recorded as inactive and new listings are missed, so start a fresh run instead.
@@ -82,7 +81,7 @@ A resume reuses the listing IDs from the original search pass. Over a long pause
 **Progress:** live view with done/total, seconds per listing and estimated finish time (refreshes every 10 s):
 
 ```bash
-python3 -m collection.tori.progress
+python3 -m priced_right.progress
 ```
 
 Timeouts seen on 2026-09-17: 3 in the first ~160 listing pages. The same pages loaded in 0.2–1.2 s moments later, so they were temporary slowdowns, not throttling.
@@ -90,11 +89,12 @@ Timeouts seen on 2026-09-17: 3 in the first ~160 listing pages. The same pages l
 Smoke test (1 search page, 5 listings, nothing committed):
 
 ```bash
-python3 -m collection.tori.collect_iphones --max-pages 1 --max-items 5 --no-commit-output
+python3 -m priced_right.collect_iphones --max-pages 1 --max-items 5 --no-commit-output
 ```
 
 | Run | Listings | Report |
 |---|---|---|
+| `iphones_2026-09-17T110158Z` | 2,178 (2,195 found; 17 removed or inactive during the run) | [report](runs/iphones_2026-09-17T110158Z.md), [summary](runs/iphones_2026-09-17T110158Z.json), data: `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` |
 
 ## Crawl4AI (Docker)
 
@@ -113,4 +113,4 @@ docker start crawl4ai
 docker run -d -p 127.0.0.1:11235:11235 --name crawl4ai --shm-size=1g --restart unless-stopped --env-file ~/.config/crawl4ai/docker.env unclecode/crawl4ai:0.9.3
 ```
 
-The CSS-selector extraction request from the first test is in [`collection/tori/listing_extraction_request.json`](../collection/tori/listing_extraction_request.json). It sends `Authorization: Bearer $CRAWL4AI_API_TOKEN` and targets `h1[data-testid='object-title']`, `section[aria-label='Tee ostotarjous'] .h2`, `section[aria-label='Lisätietoja'] p`, `section[data-testid='description'] .whitespace-pre-wrap` and `section[data-testid='object-info'] p`.
+If a browser crawl is ever needed again, the first test's CSS selectors (sent to `/crawl` with `Authorization: Bearer $CRAWL4AI_API_TOKEN`) were `h1[data-testid='object-title']`, `section[aria-label='Tee ostotarjous'] .h2`, `section[aria-label='Lisätietoja'] p`, `section[data-testid='description'] .whitespace-pre-wrap` and `section[data-testid='object-info'] p`.

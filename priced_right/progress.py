@@ -1,8 +1,8 @@
 """Show progress of an iPhone collection run.
 
-    python3 -m collection.tori.progress            # latest run, refreshes every 10 s (Ctrl-C to quit)
-    python3 -m collection.tori.progress --once     # print once
-    python3 -m collection.tori.progress data/raw/tori/iphones_<timestamp>
+    python3 -m priced_right.progress            # latest run, refreshes every 10 s (Ctrl-C to quit)
+    python3 -m priced_right.progress --once     # print once
+    python3 -m priced_right.progress data/raw/tori/iphones_<timestamp>
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-RAW_DIR = Path(__file__).resolve().parents[2] / "data" / "raw" / "tori"
+RAW_DIR = Path(__file__).resolve().parents[1] / "data" / "raw" / "tori"
 
 
 def count_lines(path: Path) -> int:

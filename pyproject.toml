@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 authors = [
     { name = "Abtaal Aatif" },
     { name = "Hashir Salam Awan" },
-    { name = "Hafiz Javid" },
+    { name = "Hafiz K. Javid" },
 ]
 dependencies = [
     "numpy>=2.0",
@@ -27,5 +27,4 @@ notebook = ["jupyterlab>=4.2"]
 dev = ["pytest>=8", "ruff>=0.6"]
 
 [tool.setuptools.packages.find]
-where = [".", "src"]
-include = ["collection*", "priced_right*"]
+include = ["priced_right*"]

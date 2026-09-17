@@ -1,0 +1,10 @@
+{
+  "collected_at": "2026-09-17T11:01:58+00:00",
+  "query": {
+    "product_category": "2.93.3217.39",
+    "brand": "631",
+    "trade_type": "1",
+    "sort": "PUBLISHED_DESC"
+  },
+  "delay_seconds": 3.0
+}

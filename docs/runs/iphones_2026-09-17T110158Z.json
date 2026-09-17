@@ -1,0 +1,288 @@
+{
+  "run": "iphones_2026-09-17T110158Z",
+  "query": {
+    "product_category": "2.93.3217.39",
+    "brand": "631",
+    "trade_type": "1",
+    "sort": "PUBLISHED_DESC"
+  },
+  "search_meta": {
+    "match_count": 2195,
+    "last_page": 42,
+    "pages_fetched": 42
+  },
+  "stopped_reason": null,
+  "counts": {
+    "search_records": 2195,
+    "item_records": 2178,
+    "failures": {
+      "http_404": 8,
+      "inactive": 9
+    },
+    "listings_joined": 2178,
+    "search_records_without_listing_page": 0
+  },
+  "coverage": {
+    "listing_id": 1.0,
+    "title": 1.0,
+    "description": 1.0,
+    "price_eur": 1.0,
+    "condition": 0.963,
+    "model_group": 0.782,
+    "memory": 0.881,
+    "seller_type": 1.0,
+    "shipping_available": 1.0,
+    "municipality": 1.0,
+    "region": 1.0,
+    "published_at": 1.0,
+    "collected_at": 1.0
+  },
+  "price_eur": {
+    "count": 2178,
+    "min": 0,
+    "p25": 105.0,
+    "median": 230.0,
+    "p75": 430.0,
+    "max": 2299
+  },
+  "price_zero": 8,
+  "accessory_like_titles": 83,
+  "seller_type": {
+    "private": {
+      "count": 1741,
+      "share": 0.799
+    },
+    "retailer": {
+      "count": 437,
+      "share": 0.201
+    }
+  },
+  "condition": {
+    "Hyvä": {
+      "count": 990,
+      "share": 0.455
+    },
+    "Kuin uusi": {
+      "count": 716,
+      "share": 0.329
+    },
+    "Uusi": {
+      "count": 165,
+      "share": 0.076
+    },
+    "Kohtalainen": {
+      "count": 160,
+      "share": 0.073
+    },
+    "None": {
+      "count": 80,
+      "share": 0.037
+    },
+    "Vaatii korjausta": {
+      "count": 67,
+      "share": 0.031
+    }
+  },
+  "model_group": {
+    "None": {
+      "count": 475,
+      "share": 0.218
+    },
+    "iPhone 13/Mini/Plus/Pro/Max": {
+      "count": 324,
+      "share": 0.149
+    },
+    "iPhone 12/Mini/Plus/Pro/Max": {
+      "count": 293,
+      "share": 0.135
+    },
+    "iPhone 2G-11": {
+      "count": 276,
+      "share": 0.127
+    },
+    "iPhone 15/Plus/Pro/Max": {
+      "count": 213,
+      "share": 0.098
+    },
+    "iPhone 16/Plus/Pro/Max": {
+      "count": 195,
+      "share": 0.09
+    },
+    "iPhone 14/Mini/Plus/Pro/Max": {
+      "count": 187,
+      "share": 0.086
+    },
+    "iPhone 17/Air/Pro/Max": {
+      "count": 117,
+      "share": 0.054
+    },
+    "iPhone SE (2-3 gen)": {
+      "count": 95,
+      "share": 0.044
+    },
+    "Galaxy A -sarja": {
+      "count": 2,
+      "share": 0.001
+    },
+    "Galaxy Z -sarja (flip/fold)": {
+      "count": 1,
+      "share": 0.0
+    }
+  },
+  "memory": {
+    "128 GB": {
+      "count": 799,
+      "share": 0.367
+    },
+    "64 GB": {
+      "count": 462,
+      "share": 0.212
+    },
+    "256 GB": {
+      "count": 358,
+      "share": 0.164
+    },
+    "None": {
+      "count": 259,
+      "share": 0.119
+    },
+    "Muu": {
+      "count": 144,
+      "share": 0.066
+    },
+    "32 GB": {
+      "count": 57,
+      "share": 0.026
+    },
+    "512 GB": {
+      "count": 54,
+      "share": 0.025
+    },
+    "16 GB": {
+      "count": 31,
+      "share": 0.014
+    },
+    "1 TB": {
+      "count": 14,
+      "share": 0.006
+    }
+  },
+  "region": {
+    "Uusimaa": {
+      "count": 1022,
+      "share": 0.469
+    },
+    "Varsinais-Suomi": {
+      "count": 209,
+      "share": 0.096
+    },
+    "Pirkanmaa": {
+      "count": 206,
+      "share": 0.095
+    },
+    "Pohjanmaa": {
+      "count": 101,
+      "share": 0.046
+    },
+    "Pohjois-Pohjanmaa": {
+      "count": 100,
+      "share": 0.046
+    },
+    "Keski-Suomi": {
+      "count": 86,
+      "share": 0.039
+    },
+    "Päijät-Häme": {
+      "count": 66,
+      "share": 0.03
+    },
+    "Pohjois-Savo": {
+      "count": 59,
+      "share": 0.027
+    },
+    "Satakunta": {
+      "count": 48,
+      "share": 0.022
+    },
+    "Kymenlaakso": {
+      "count": 46,
+      "share": 0.021
+    },
+    "Etelä-Karjala": {
+      "count": 42,
+      "share": 0.019
+    },
+    "Etelä-Pohjanmaa": {
+      "count": 40,
+      "share": 0.018
+    },
+    "Pohjois-Karjala": {
+      "count": 37,
+      "share": 0.017
+    },
+    "Lappi": {
+      "count": 35,
+      "share": 0.016
+    },
+    "Etelä-Savo": {
+      "count": 33,
+      "share": 0.015
+    },
+    "Kanta-Häme": {
+      "count": 32,
+      "share": 0.015
+    },
+    "Kainuu": {
+      "count": 9,
+      "share": 0.004
+    },
+    "Keski-Pohjanmaa": {
+      "count": 7,
+      "share": 0.003
+    }
+  },
+  "median_price_by_condition": {
+    "Hyvä": 200.0,
+    "Kuin uusi": 350.0,
+    "Uusi": 400,
+    "Kohtalainen": 85.0,
+    "None": 150.0,
+    "Vaatii korjausta": 40
+  },
+  "median_price_by_model_group": {
+    "None": 120,
+    "iPhone 13/Mini/Plus/Pro/Max": 250.0,
+    "iPhone 12/Mini/Plus/Pro/Max": 165,
+    "iPhone 2G-11": 100.0,
+    "iPhone 15/Plus/Pro/Max": 450,
+    "iPhone 16/Plus/Pro/Max": 650,
+    "iPhone 14/Mini/Plus/Pro/Max": 370,
+    "iPhone 17/Air/Pro/Max": 950,
+    "iPhone SE (2-3 gen)": 80,
+    "Galaxy A -sarja": 177.0,
+    "Galaxy Z -sarja (flip/fold)": 370
+  },
+  "median_price_by_seller_type": {
+    "private": 200,
+    "retailer": 340
+  },
+  "description_chars": {
+    "count": 2178,
+    "min": 4,
+    "p25": 148.0,
+    "median": 268.0,
+    "p75": 471.25,
+    "max": 3876
+  },
+  "descriptions_with_scrubbed_contacts": 150,
+  "requests_this_session": {
+    "count": 2,
+    "statuses": {
+      "200": 2
+    },
+    "mean_seconds": 0.155,
+    "total_mb": 0.2,
+    "delay_seconds": 3.0,
+    "user_agent": "priced-right/0.1 (student data science project; non-commercial)"
+  }
+}
