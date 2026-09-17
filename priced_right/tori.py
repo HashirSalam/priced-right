@@ -11,10 +11,12 @@ import base64
 import json
 import random
 import re
+import statistics
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections import Counter
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -52,6 +54,27 @@ _ITEM_STATE_RE = re.compile(
 )
 _EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 _PHONE_RE = re.compile(r"(?<!\d)(?:\+358|00358|0)[\s-]?\d{1,3}(?:[\s-]?\d{2,4}){2,3}(?!\d)")
+
+
+# Heuristic only: titles that look like accessories or spare parts rather than phones.
+ACCESSORY_TITLE_RE = re.compile(
+    r"\b(suoja)?kuor\w*|\bkotelo\w*|suojalasi\w*|panssarilasi\w*|takakan\w*|laturi\w*|kaapeli\w*|johto\w*|varaosa\w*|\bcase\b|\bcover\b",
+    re.I,
+)
+
+
+def quantiles(values: List[float]) -> Dict[str, Any]:
+    """Min, quartiles and max for run summaries."""
+    if not values:
+        return {"count": 0}
+    values = sorted(values)
+    q1, median, q3 = statistics.quantiles(values, n=4) if len(values) > 1 else (values[0],) * 3
+    return {"count": len(values), "min": values[0], "p25": q1, "median": median, "p75": q3, "max": values[-1]}
+
+
+def share(counter: Counter, total: int) -> Dict[str, Any]:
+    """Counts with their share of the total, most common first."""
+    return {str(k): {"count": v, "share": round(v / total, 3)} for k, v in counter.most_common()} if total else {}
 
 
 def utc_now() -> str:

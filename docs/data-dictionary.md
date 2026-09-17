@@ -1,8 +1,8 @@
 # Data Dictionary: iPhone Listings (Tori.fi)
 
-Scope: for-sale iPhone listings in Tori's phone category (`Matkapuhelimet`, brand Apple). We collect only the fields the model and the fairness audit need. Everything else Tori exposes is dropped when the record is built (`collection/tori/tori.py`), before anything is written to disk.
+Scope: for-sale iPhone listings in Tori's phone category (`Matkapuhelimet`, brand Apple). We collect only the fields the model and the fairness audit need. Everything else Tori exposes is dropped when the record is built (`priced_right/tori.py`), before anything is written to disk.
 
-Coverage figures come from experiment 01 (2026-09-17: 129 search results, 10 listing pages), see [collection/tori/output/exp01_feasibility/report.md](../collection/tori/output/exp01_feasibility/report.md).
+Coverage figures come from experiment 01 (2026-09-17: 129 search results, 10 listing pages), see [runs/exp01_feasibility.md](runs/exp01_feasibility.md).
 
 ## Target
 

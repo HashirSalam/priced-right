@@ -4,7 +4,7 @@
 
 ## Tori.fi: crawler rules
 
-Rules the collector follows, all implemented in [`collection/tori/tori.py`](../collection/tori/tori.py):
+Rules the collector follows, all implemented in [`priced_right/tori.py`](../priced_right/tori.py):
 
 1. **robots.txt:** only `/recommerce/forsale/search` and `/recommerce/forsale/item/*` are fetched. Tori disallows `/map*`, `/profile*`, `/messages*`, `/contact/*`, `/report/*` and account pages. Python's `urllib.robotparser` ignores `*` wildcards and wrongly allows `/profile*` and `/map*`, so `RobotsRules` implements the matching itself (longest match wins).
 2. **One request at a time,** at least 3 s apart plus up to 1 s random jitter (`ToriClient`).
@@ -27,7 +27,7 @@ Rules the collector follows, all implemented in [`collection/tori/tori.py`](../c
 | `sort` | `PUBLISHED_DESC` | Newest first, which keeps page order stable. Others: `PRICE_ASC`, `PRICE_DESC`, `RELEVANCE`, `PUBLISHED_ASC`, `CLOSEST` |
 | `page` | 1…`metadata.paging.last` | 53 results per page; Tori caps paging at page 50 (~2,650 results per query) |
 | `condition` | `1`–`5` | Uusi, Kuin uusi, Hyvä, Kohtalainen, Vaatii korjausta |
-| `mobile_model` | e.g. `6` | iPhone 15/Plus/Pro/Max. All values: [filters.json](../collection/tori/output/exp01_feasibility/filters.json) |
+| `mobile_model` | e.g. `6` | iPhone 15/Plus/Pro/Max. All values: [exp01_filters.json](runs/exp01_filters.json) |
 
 - **Data location:** `<script type="application/json" data-react-query-state>` holds **base64-encoded** JSON. The query whose key has `scope: "search"` contains `docs` (listings), `filters` (options with hit counts) and `metadata` (`result_size.match_count`, `paging`).
 - **Per listing:** `id`, `heading`, `price.amount` + `currency_code`, `location` ("district, municipality"), `timestamp` (ms, published or renewed), `memory_size`, `brand`, `flags` (`private` / `retailer`, `shipping_exists`, `buy_now`), and image and coordinate fields we drop.
@@ -57,24 +57,24 @@ Rules the collector follows, all implemented in [`collection/tori/tori.py`](../c
 
 | # | Script | Question | Output |
 |---|---|---|---|
-| 01 | `python3 -m collection.tori.exp01_feasibility` | Can we collect iPhones, and which fields are available? | [report](../collection/tori/output/exp01_feasibility/report.md), [summary.json](../collection/tori/output/exp01_feasibility/summary.json), [filters.json](../collection/tori/output/exp01_feasibility/filters.json) |
+| 01 | `python3 -m priced_right.exp01_feasibility` | Can we collect iPhones, and which fields are available? | [report](runs/exp01_feasibility.md), [summary](runs/exp01_feasibility.json), [filters](runs/exp01_filters.json) |
 
 Run from the repo root. The code uses only the standard library and needs Python 3.9 or newer.
 
 ## Collection runs
 
-`python3 -m collection.tori.collect_iphones` collects every for-sale iPhone listing:
+`python3 -m priced_right.collect_iphones` collects every for-sale iPhone listing:
 
 1. **Search pass:** all result pages go to `search_records.jsonl`. Listings shift between pages while new ones are published, so records are deduplicated by `listing_id`.
 2. **Listing pass:** one listing page per result goes to `item_records.jsonl`. Inactive or removed listings go to `failures.jsonl` with a reason.
 3. **Join:** `listings.csv` contains one row per listing with both records, using the columns in [data-dictionary.md](data-dictionary.md). This is the input for preprocessing.
 
-Everything lands in `data/raw/tori/iphones_<timestamp>/` (git-ignored). The aggregate `summary.json` and `report.md` are committed under `collection/tori/output/collect_iphones/<run>/`.
+Everything lands in `data/raw/tori/iphones_<timestamp>/` (git-ignored). The aggregate summary and report are committed as `docs/runs/iphones_<timestamp>.json` and `.md`.
 
 **Pause and resume:** press Ctrl-C in the collector's terminal, or run `kill <pid>` from another one. Each record is saved as soon as it's fetched, and a pause also writes `listings.csv` and the summary for the listings so far. The run also stops by itself on HTTP 403 or 429, or after 5 consecutive errors. Timeouts and connection errors skip the listing without marking it done, so a resume retries it. Continue with:
 
 ```bash
-python3 -m collection.tori.collect_iphones --resume data/raw/tori/iphones_<timestamp>
+python3 -m priced_right.collect_iphones --resume data/raw/tori/iphones_<timestamp>
 ```
 
 A resume reuses the listing IDs from the original search pass. Over a long pause, sold listings get recorded as inactive and new listings are missed, so start a fresh run instead.
@@ -82,7 +82,7 @@ A resume reuses the listing IDs from the original search pass. Over a long pause
 **Progress:** live view with done/total, seconds per listing and estimated finish time (refreshes every 10 s):
 
 ```bash
-python3 -m collection.tori.progress
+python3 -m priced_right.progress
 ```
 
 Timeouts seen on 2026-09-17: 3 in the first ~160 listing pages. The same pages loaded in 0.2–1.2 s moments later, so they were temporary slowdowns, not throttling.
@@ -90,7 +90,7 @@ Timeouts seen on 2026-09-17: 3 in the first ~160 listing pages. The same pages l
 Smoke test (1 search page, 5 listings, nothing committed):
 
 ```bash
-python3 -m collection.tori.collect_iphones --max-pages 1 --max-items 5 --no-commit-output
+python3 -m priced_right.collect_iphones --max-pages 1 --max-items 5 --no-commit-output
 ```
 
 | Run | Listings | Report |
@@ -113,4 +113,4 @@ docker start crawl4ai
 docker run -d -p 127.0.0.1:11235:11235 --name crawl4ai --shm-size=1g --restart unless-stopped --env-file ~/.config/crawl4ai/docker.env unclecode/crawl4ai:0.9.3
 ```
 
-The CSS-selector extraction request from the first test is in [`collection/tori/listing_extraction_request.json`](../collection/tori/listing_extraction_request.json). It sends `Authorization: Bearer $CRAWL4AI_API_TOKEN` and targets `h1[data-testid='object-title']`, `section[aria-label='Tee ostotarjous'] .h2`, `section[aria-label='Lisätietoja'] p`, `section[data-testid='description'] .whitespace-pre-wrap` and `section[data-testid='object-info'] p`.
+If a browser crawl is ever needed again, the first test's CSS selectors (sent to `/crawl` with `Authorization: Bearer $CRAWL4AI_API_TOKEN`) were `h1[data-testid='object-title']`, `section[aria-label='Tee ostotarjous'] .h2`, `section[aria-label='Lisätietoja'] p`, `section[data-testid='description'] .whitespace-pre-wrap` and `section[data-testid='object-info'] p`.

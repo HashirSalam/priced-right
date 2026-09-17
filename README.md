@@ -68,7 +68,7 @@ source .venv/bin/activate
 pip install -e ".[notebook,dev]"
 ```
 
-This installs the project in editable mode, so `import collection` and `import priced_right` work from notebooks, scripts and the app. The optional extras are `notebook` (JupyterLab) and `dev` (pytest, ruff).
+This installs the project in editable mode, so `import priced_right` works from notebooks, scripts and the app. The optional extras are `notebook` (JupyterLab) and `dev` (pytest, ruff).
 
 To get the exact versions the group uses, install from the lock file:
 
@@ -82,15 +82,13 @@ After adding or upgrading a dependency in `pyproject.toml`, refresh the lock fil
 ## Layout
 
 ```
-collection/      scrapers, API clients and collection experiments (collection/tori)
-data/raw/        raw JSON as collected (not committed)
-data/processed/  tidy, versioned CSVs (not committed)
-notebooks/       EDA and modelling experiments
-src/priced_right/ preprocessing, features, models (pipeline reused by the app)
-app/             Flask web app
-reports/         figures, report, presentation
-docs/            project canvas, data dictionary, data collection notes
+priced_right/   all Python code: Tori collector now; preprocessing, models and the Flask app later
+docs/           project canvas, data dictionary, data collection notes
+docs/runs/      generated reports from collection runs and experiments
+data/           collected data, created by the collector (not committed)
 ```
+
+Add folders only when there is something to put in them (e.g. `notebooks/` for EDA).
 
 `data/` is gitignored. Three weeks of daily snapshots runs to hundreds of megabytes and the
 raw files are reproducible from the collector.
@@ -113,13 +111,13 @@ runs only pay for listings that appeared since the last pass.
 Run from the repo root. The collection code uses only the standard library and also runs on Python 3.9:
 
 ```bash
-python3 -m collection.tori.exp01_feasibility
+python3 -m priced_right.exp01_feasibility
 ```
 
 That is the small feasibility test. The full iPhone collection (~2 h) writes `data/raw/tori/iphones_<timestamp>/listings.csv`:
 
 ```bash
-python3 -m collection.tori.collect_iphones
+python3 -m priced_right.collect_iphones
 ```
 
 ## Why the daily cadence matters

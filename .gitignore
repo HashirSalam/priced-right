@@ -1,8 +1,5 @@
 # Data (may contain personal information before cleaning)
-data/raw/*
-data/processed/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
+data/
 
 # Secrets
 .env
