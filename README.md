@@ -25,19 +25,60 @@ Narrowing also buys depth. One category collected properly beats three collected
 the interesting question is how much of the price spread is explained by the attributes Tori
 already gives us.
 
-## Plan at a glance
+## Roadmap
 
-| Week | Focus | Output |
-|---|---|---|
-| 1 | Data collection, preprocessing | Raw JSON, tidy versioned CSV |
-| 2 | EDA, visualizations | Price by model/storage/condition, spread, keyword associations |
-| 3–4 | Modelling | Median baseline vs. Ridge (TF-IDF + tabular) vs. Random Forest, grouped k-fold CV |
-| 5 | Fairness, privacy | Regional error audit, misuse discussion |
-| — | Deliverable | Flask web app (seller and buyer modes), report, presentation |
+The project runs over two weekends. Tick items off here as they land.
+
+```mermaid
+gantt
+    title Priced Right? timeline
+    dateFormat YYYY-MM-DD
+    axisFormat %a %d %b
+    section Data
+    Data collection                  :done, 2026-09-17, 1d
+    Setup and group decisions        :2026-09-18, 1d
+    Repeat collection (optional)     :2026-09-25, 1d
+    section Weekend 1
+    Preprocessing                    :2026-09-19, 1d
+    Evaluation setup and baseline    :2026-09-19, 1d
+    EDA                              :2026-09-19, 2d
+    Ridge and Random Forest          :2026-09-20, 1d
+    section Weekend 2
+    Final model and price ranges     :2026-09-26, 1d
+    Fairness check                   :2026-09-26, 1d
+    Flask app                        :2026-09-26, 1d
+    Report and presentation          :2026-09-27, 1d
+```
+
+### Done: data collection (Thu 17 Sep)
+
+- [x] Tori.fi collector with crawler rules, privacy filtering and pause/resume
+- [x] Full iPhone run: 2,178 listings in `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` ([report](docs/runs/iphones_2026-09-17T110158Z.md))
+
+### Before Saturday 19 Sep
+
+- [ ] Everyone: `git pull` and set up the environment (see [Setup](#setup))
+- [ ] Decide on retailer listings (20% of the data): keep them with `seller_type` as a feature, model them separately, or drop them
+- [ ] Decide on daily snapshots: drop them, or run one repeat collection on Fri 25 Sep to see which listings disappeared
+- [ ] Split the work: preprocessing, EDA, modelling, app, report
+
+### Weekend 1 · Sat–Sun 19–20 Sep: clean data and first models
+
+- [ ] **Preprocessing:** drop accessories, 0 € swap ads and the 3 Samsung listings; get the exact model and battery % from title and description; fill in missing model and memory where the text allows; mark relistings → `data/processed/iphones_clean.csv`
+- [ ] **EDA:** prices by model, storage, condition, seller type and region; price spread; keyword associations → notebook and figures
+- [ ] **Evaluation setup:** grouped k-fold split so relistings stay together; MAE in € and median % error → reusable function
+- [ ] **Models:** median baseline by model and storage, Ridge (TF-IDF + fields), Random Forest → comparison table
 
 The median baseline is grouped by model and storage. If a fitted model does not clearly beat
 that lookup table, the finding is about the problem rather than about our modelling, and it
 belongs in the report either way.
+
+### Weekend 2 · Sat–Sun 26–27 Sep: app and report
+
+- [ ] **Final model:** pick the best model; price ranges from held-out errors; save it for the app
+- [ ] **Fairness check:** error by region and seller type; privacy and misuse discussion
+- [ ] **Flask app:** seller mode (expected price and range), buyer mode (below / in line / above comparable listings)
+- [ ] **Report and presentation**
 
 ## Data source and collection policy
 
