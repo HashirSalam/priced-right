@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 authors = [
     { name = "Abtaal Aatif" },
     { name = "Hashir Salam Awan" },
-    { name = "Hafiz K. Javid" },
+    { name = "Hafiz Khurram Javid" },
 ]
 dependencies = [
     "numpy>=2.0",
