@@ -1,6 +1,6 @@
 # Data Collection Notes
 
-> Bulk collection from Tori.fi waits on written permission (see the canvas). So far only small experiments have run: 14 requests on 2026-09-17. The eBay Browse API is the fallback source.
+> The canvas makes Tori.fi collection conditional on written permission, with the eBay Browse API as the fallback. On 2026-09-17 the group ran the full iPhone collection ([collection runs](#collection-runs)). The permission status should be recorded here once known.
 
 ## Tori.fi: crawler rules
 
@@ -60,6 +60,41 @@ Rules the collector follows, all implemented in [`collection/tori/tori.py`](../c
 | 01 | `python3 -m collection.tori.exp01_feasibility` | Can we collect iPhones, and which fields are available? | [report](../collection/tori/output/exp01_feasibility/report.md), [summary.json](../collection/tori/output/exp01_feasibility/summary.json), [filters.json](../collection/tori/output/exp01_feasibility/filters.json) |
 
 Run from the repo root. The code uses only the standard library and needs Python 3.9 or newer.
+
+## Collection runs
+
+`python3 -m collection.tori.collect_iphones` collects every for-sale iPhone listing:
+
+1. **Search pass:** all result pages go to `search_records.jsonl`. Listings shift between pages while new ones are published, so records are deduplicated by `listing_id`.
+2. **Listing pass:** one listing page per result goes to `item_records.jsonl`. Inactive or removed listings go to `failures.jsonl` with a reason.
+3. **Join:** `listings.csv` contains one row per listing with both records, using the columns in [data-dictionary.md](data-dictionary.md). This is the input for preprocessing.
+
+Everything lands in `data/raw/tori/iphones_<timestamp>/` (git-ignored). The aggregate `summary.json` and `report.md` are committed under `collection/tori/output/collect_iphones/<run>/`.
+
+**Pause and resume:** press Ctrl-C in the collector's terminal, or run `kill <pid>` from another one. Each record is saved as soon as it's fetched, and a pause also writes `listings.csv` and the summary for the listings so far. The run also stops by itself on HTTP 403 or 429, or after 5 consecutive errors. Timeouts and connection errors skip the listing without marking it done, so a resume retries it. Continue with:
+
+```bash
+python3 -m collection.tori.collect_iphones --resume data/raw/tori/iphones_<timestamp>
+```
+
+A resume reuses the listing IDs from the original search pass. Over a long pause, sold listings get recorded as inactive and new listings are missed, so start a fresh run instead.
+
+**Progress:** live view with done/total, seconds per listing and estimated finish time (refreshes every 10 s):
+
+```bash
+python3 -m collection.tori.progress
+```
+
+Timeouts seen on 2026-09-17: 3 in the first ~160 listing pages. The same pages loaded in 0.2–1.2 s moments later, so they were temporary slowdowns, not throttling.
+
+Smoke test (1 search page, 5 listings, nothing committed):
+
+```bash
+python3 -m collection.tori.collect_iphones --max-pages 1 --max-items 5 --no-commit-output
+```
+
+| Run | Listings | Report |
+|---|---|---|
 
 ## Crawl4AI (Docker)
 

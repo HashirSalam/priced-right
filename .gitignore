@@ -19,3 +19,8 @@ venv/
 .DS_Store
 .vscode/
 .idea/
+
+# Packaging
+*.egg-info/
+build/
+dist/

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "priced-right"
+version = "0.1.0"
+description = "Estimating expected asking prices for second-hand listings"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Abtaal Aatif" },
+    { name = "Hashir Salam Awan" },
+    { name = "Hafiz Javid" },
+]
+dependencies = [
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "scikit-learn>=1.5",
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "flask>=3.0",
+]
+
+[project.optional-dependencies]
+notebook = ["jupyterlab>=4.2"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.setuptools.packages.find]
+where = [".", "src"]
+include = ["collection*", "priced_right*"]

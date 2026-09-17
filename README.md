@@ -58,6 +58,27 @@ See [docs/data-collection-notes.md](docs/data-collection-notes.md) for the crawl
 how Tori exposes its data, and [docs/data-dictionary.md](docs/data-dictionary.md) for the
 fields we collect and what we deliberately leave out.
 
+## Setup
+
+Requires Python 3.11+ (3.13 recommended). From the repo root:
+
+```bash
+python3.13 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[notebook,dev]"
+```
+
+This installs the project in editable mode, so `import collection` and `import priced_right` work from notebooks, scripts and the app. The optional extras are `notebook` (JupyterLab) and `dev` (pytest, ruff).
+
+To get the exact versions the group uses, install from the lock file:
+
+```bash
+pip install -r requirements-lock.txt
+pip install -e . --no-deps
+```
+
+After adding or upgrading a dependency in `pyproject.toml`, refresh the lock file with `pip freeze --exclude-editable > requirements-lock.txt` and commit both files.
+
 ## Layout
 
 ```
@@ -65,7 +86,7 @@ collection/      scrapers, API clients and collection experiments (collection/to
 data/raw/        raw JSON as collected (not committed)
 data/processed/  tidy, versioned CSVs (not committed)
 notebooks/       EDA and modelling experiments
-src/             preprocessing, features, models (pipeline reused by the app)
+src/priced_right/ preprocessing, features, models (pipeline reused by the app)
 app/             Flask web app
 reports/         figures, report, presentation
 docs/            project canvas, data dictionary, data collection notes
@@ -89,10 +110,16 @@ carry: graded condition, model, storage, description, postal code and region. Th
 change after a listing is posted, so each listing is fetched exactly once and cached; repeat
 runs only pay for listings that appeared since the last pass.
 
-Run experiment 01 (small feasibility test, standard library only) from the repo root:
+Run from the repo root. The collection code uses only the standard library and also runs on Python 3.9:
 
 ```bash
 python3 -m collection.tori.exp01_feasibility
+```
+
+That is the small feasibility test. The full iPhone collection (~2 h) writes `data/raw/tori/iphones_<timestamp>/listings.csv`:
+
+```bash
+python3 -m collection.tori.collect_iphones
 ```
 
 ## Why the daily cadence matters
