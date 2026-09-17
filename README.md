@@ -23,16 +23,25 @@ Full plan: [docs/project-canvas.md](docs/project-canvas.md)
 ## Layout
 
 ```
-collection/      scrapers and API clients (collection/tori: Crawl4AI extraction request)
+collection/      scrapers, API clients and collection experiments (collection/tori)
 data/raw/        raw JSON as collected (not committed)
 data/processed/  tidy, versioned CSVs (not committed)
 notebooks/       EDA and modelling experiments
 src/             preprocessing, features, models (pipeline reused by the app)
 app/             Flask web app
 reports/         figures, report, presentation
-docs/            project canvas, data collection notes
+docs/            project canvas, data dictionary, data collection notes
 ```
 
 ## Data collection
 
-See [docs/data-collection-notes.md](docs/data-collection-notes.md) for the Crawl4AI Docker setup and verified Tori.fi selectors.
+Current scope: for-sale iPhone listings.
+
+- [docs/data-dictionary.md](docs/data-dictionary.md): the fields we collect, why, and what we deliberately leave out
+- [docs/data-collection-notes.md](docs/data-collection-notes.md): crawler rules, how Tori exposes its data, experiments
+
+Run experiment 01 (small feasibility test, standard library only) from the repo root:
+
+```bash
+python3 -m collection.tori.exp01_feasibility
+```

@@ -1,0 +1,173 @@
+{
+  "experiment": "exp01_feasibility",
+  "started_at": "2026-09-17T10:54:41+00:00",
+  "query": {
+    "product_category": "2.93.3217.39",
+    "brand": "631",
+    "trade_type": "1",
+    "sort": "PUBLISHED_DESC"
+  },
+  "robots": {
+    "search_allowed": true,
+    "item_allowed": true,
+    "map_allowed": false,
+    "profile_allowed": false
+  },
+  "search": {
+    "match_count": 2196,
+    "last_page": 42,
+    "docs_per_page": {
+      "1": 53,
+      "2": 53,
+      "42": 23
+    },
+    "estimated_requests_for_all_results": 42,
+    "duplicate_ids_across_pages": 0,
+    "unique_docs_sampled": 129,
+    "doc_keys": {
+      "type": 129,
+      "id": 129,
+      "main_search_key": 129,
+      "heading": 129,
+      "location": 129,
+      "image": 127,
+      "flags": 129,
+      "timestamp": 129,
+      "coordinates": 129,
+      "ad_type": 129,
+      "labels": 129,
+      "canonical_url": 129,
+      "extras": 129,
+      "price": 129,
+      "distance": 129,
+      "trade_type": 129,
+      "image_urls": 129,
+      "brand": 129,
+      "memory_size": 120,
+      "ad_id": 129,
+      "metadata": 129,
+      "organisation_name": 52
+    },
+    "coverage": {
+      "price": 1.0,
+      "memory_size": 0.9302325581395349,
+      "location_with_municipality": 1.0,
+      "timestamp": 1.0
+    },
+    "currencies": {
+      "EUR": 129
+    },
+    "price_eur": {
+      "count": 129,
+      "min": 0,
+      "p25": 169.0,
+      "median": 250.0,
+      "p75": 599.0,
+      "max": 1490
+    },
+    "price_zero": 1,
+    "price_at_most_20": 1,
+    "flags": {
+      "private": 77,
+      "shipping_exists": 29,
+      "buy_now": 28,
+      "seller_pays_shipping": 3,
+      "retailer": 52
+    },
+    "memory_size": {
+      "128 GB": 56,
+      "64 GB": 27,
+      "256 GB": 27,
+      "Muu": 6,
+      "null": 9,
+      "512 GB": 2,
+      "1 TB": 2
+    },
+    "accessory_like_titles": 2,
+    "seller_type": {
+      "private": {
+        "count": 77,
+        "share": 0.597
+      },
+      "retailer": {
+        "count": 52,
+        "share": 0.403
+      }
+    }
+  },
+  "items": {
+    "sampled": 10,
+    "parsed_active": 10,
+    "inactive_or_disposed": 0,
+    "failures": [],
+    "coverage": {
+      "description": 1.0,
+      "condition": 1.0,
+      "model_group": 1.0,
+      "region": 1.0
+    },
+    "description_chars": {
+      "count": 10,
+      "min": 4,
+      "p25": 233.5,
+      "median": 289.0,
+      "p75": 408.5,
+      "max": 1106
+    },
+    "pii_replacements_in_descriptions": 1,
+    "condition": {
+      "Hyvä": 5,
+      "Kuin uusi": 3,
+      "Vaatii korjausta": 1,
+      "Uusi": 1
+    },
+    "model_group": {
+      "iPhone 12/Mini/Plus/Pro/Max": 2,
+      "iPhone 16/Plus/Pro/Max": 2,
+      "iPhone 2G-11": 2,
+      "iPhone SE (2-3 gen)": 1,
+      "iPhone 17/Air/Pro/Max": 1,
+      "iPhone 14/Mini/Plus/Pro/Max": 1,
+      "iPhone 13/Mini/Plus/Pro/Max": 1
+    },
+    "region": {
+      "Varsinais-Suomi": 2,
+      "Uusimaa": 5,
+      "Pohjanmaa": 1,
+      "Keski-Suomi": 1,
+      "Pirkanmaa": 1
+    },
+    "postal_name_parts": {
+      "3": 10
+    }
+  },
+  "privacy": {
+    "stored_keys": [
+      "collected_at",
+      "condition",
+      "description",
+      "listing_id",
+      "memory",
+      "model_group",
+      "municipality",
+      "price_eur",
+      "published_at",
+      "region",
+      "seller_type",
+      "shipping_available",
+      "title"
+    ],
+    "forbidden_keys_present": []
+  },
+  "requests": {
+    "count": 14,
+    "statuses": {
+      "200": 14
+    },
+    "mean_seconds": 0.265,
+    "total_mb": 4.91,
+    "delay_seconds": 3.0,
+    "user_agent": "priced-right/0.1 (student data science project; non-commercial)"
+  },
+  "finished_at": "2026-09-17T10:55:28+00:00"
+}
