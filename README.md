@@ -2,7 +2,7 @@
 
 Estimating expected asking prices for second-hand listings.
 
-Group: Abtaal Aatif, Hashir Salam Awan, Hafiz K. Javid
+Group: Abtaal Aatif, Hashir Salam Awan, Hafiz Khurram Javid
 
 Sellers and buyers lack a reliable reference for second-hand asking prices. This project
 learns an expected asking price for second-hand iPhones from comparable listings and tells
