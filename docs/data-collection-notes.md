@@ -27,7 +27,11 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 | `sort` | `PUBLISHED_DESC` | Newest first, which keeps page order stable. Others: `PRICE_ASC`, `PRICE_DESC`, `RELEVANCE`, `PUBLISHED_ASC`, `CLOSEST` |
 | `page` | 1…`metadata.paging.last` | 53 results per page; Tori caps paging at page 50 (~2,650 results per query) |
 | `condition` | `1`–`5` | Uusi, Kuin uusi, Hyvä, Kohtalainen, Vaatii korjausta |
-| `mobile_model` | e.g. `6` | iPhone 15/Plus/Pro/Max. All values: [exp01_filters.json](runs/exp01_filters.json) |
+| `mobile_model` | see below | iPhone model group |
+| `mobile_memory_size` | `1`–`7`, `1318` | 16, 32, 64, 128, 256, 512 GB, `7` Muu (other), `1318` 1 TB |
+| `dealer_segment` | `1`, `3` | Yksityinen (private), Yritys (business) |
+
+`mobile_model` values for iPhones: `1` iPhone 2G-11, `2` iPhone SE (2-3 gen), `3` iPhone 12/Mini/Plus/Pro/Max, `4` iPhone 13/Mini/Plus/Pro/Max, `5` iPhone 14/Mini/Plus/Pro/Max, `6` iPhone 15/Plus/Pro/Max, `7` iPhone 16/Plus/Pro/Max, `3066` iPhone 17/Air/Pro/Max. Each run also saves the current filter values and hit counts in `data/raw/tori/<run>/search_meta.json`.
 
 - **Data location:** `<script type="application/json" data-react-query-state>` holds **base64-encoded** JSON. The query whose key has `scope: "search"` contains `docs` (listings), `filters` (options with hit counts) and `metadata` (`result_size.match_count`, `paging`).
 - **Per listing:** `id`, `heading`, `price.amount` + `currency_code`, `location` ("district, municipality"), `timestamp` (ms, published or renewed), `memory_size`, `brand`, `flags` (`private` / `retailer`, `shipping_exists`, `buy_now`), and image and coordinate fields we drop.
@@ -53,17 +57,9 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 - Retailers made up 40% of listings in the sample (Elisa, Multitronic, …).
 - Some descriptions contain phone numbers (1 of 10 sampled).
 
-## Experiments
-
-| # | Script | Question | Output |
-|---|---|---|---|
-| 01 | `python3 -m priced_right.exp01_feasibility` | Can we collect iPhones, and which fields are available? | [report](runs/exp01_feasibility.md), [summary](runs/exp01_feasibility.json), [filters](runs/exp01_filters.json) |
-
-Run from the repo root. The code uses only the standard library and needs Python 3.9 or newer.
-
 ## Collection runs
 
-`python3 -m priced_right.collect_iphones` collects every for-sale iPhone listing:
+`python3 -m priced_right.collect_iphones` collects every for-sale iPhone listing. Run it from the repo root; the code uses only the standard library and needs Python 3.9 or newer.
 
 1. **Search pass:** all result pages go to `search_records.jsonl`. Listings shift between pages while new ones are published, so records are deduplicated by `listing_id`.
 2. **Listing pass:** one listing page per result goes to `item_records.jsonl`. Inactive or removed listings go to `failures.jsonl` with a reason.

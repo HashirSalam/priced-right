@@ -79,13 +79,60 @@ pip install -e . --no-deps
 
 After adding or upgrading a dependency in `pyproject.toml`, refresh the lock file with `pip freeze --exclude-editable > requirements-lock.txt` and commit both files.
 
-## Layout
+## Project structure
 
 ```
-priced_right/   all Python code: Tori collector now; preprocessing, models and the Flask app later
-docs/           project canvas, data dictionary, data collection notes
-docs/runs/      generated reports from collection runs and experiments
-data/           collected data, created by the collector (not committed)
+priced-right/
+├── README.md                        overview, setup, collection policy
+├── pyproject.toml                   dependencies and package config
+├── requirements-lock.txt            exact package versions for the group
+│
+├── priced_right/                    all Python code, one package
+│   ├── tori.py                      Tori client: requests, robots.txt, parsing, privacy filter
+│   ├── collect_iphones.py           full iPhone collection (search + listing pages)
+│   └── progress.py                  live progress of a running collection
+│
+├── docs/
+│   ├── project-canvas.md            the mini project canvas
+│   ├── data-dictionary.md           fields we collect, why, and what we leave out
+│   ├── data-collection-notes.md     crawler rules and how Tori exposes its data
+│   └── runs/                        generated report for every run (committed)
+│
+└── data/                            collected data (git-ignored, created by the collector)
+    └── raw/tori/iphones_<time>/     records, listings.csv, failures, log
+```
+
+How the pieces fit together:
+
+```mermaid
+flowchart LR
+    tori[("Tori.fi")]
+
+    subgraph pkg["priced_right/"]
+        client["tori.py<br/>requests · robots.txt<br/>parsing · privacy filter"]
+        collect["collect_iphones.py"]
+        progress["progress.py"]
+    end
+
+    subgraph datadir["data/ · git-ignored"]
+        raw["raw/tori/iphones_…/<br/>listings.csv"]
+    end
+
+    subgraph runs["docs/runs/ · committed"]
+        reports["run reports<br/>.md + .json"]
+    end
+
+    planned["preprocessing → models → Flask app<br/>(planned)"]
+
+    tori -- "search + listing pages" --> client
+    client --> collect
+    collect -- "minimized records" --> raw
+    collect -- "aggregate summary" --> reports
+    raw -. "watches" .-> progress
+    raw -.-> planned
+
+    classDef todo stroke-dasharray: 5 5
+    class planned todo
 ```
 
 Add folders only when there is something to put in them (e.g. `notebooks/` for EDA).
@@ -108,13 +155,7 @@ carry: graded condition, model, storage, description, postal code and region. Th
 change after a listing is posted, so each listing is fetched exactly once and cached; repeat
 runs only pay for listings that appeared since the last pass.
 
-Run from the repo root. The collection code uses only the standard library and also runs on Python 3.9:
-
-```bash
-python3 -m priced_right.exp01_feasibility
-```
-
-That is the small feasibility test. The full iPhone collection (~2 h) writes `data/raw/tori/iphones_<timestamp>/listings.csv`:
+Run from the repo root. The collection code uses only the standard library and also runs on Python 3.9. A full iPhone collection (~2 h) writes `data/raw/tori/iphones_<timestamp>/listings.csv`:
 
 ```bash
 python3 -m priced_right.collect_iphones

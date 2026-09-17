@@ -2,7 +2,7 @@
 
 Scope: for-sale iPhone listings in Tori's phone category (`Matkapuhelimet`, brand Apple). We collect only the fields the model and the fairness audit need. Everything else Tori exposes is dropped when the record is built (`priced_right/tori.py`), before anything is written to disk.
 
-Coverage figures come from experiment 01 (2026-09-17: 129 search results, 10 listing pages), see [runs/exp01_feasibility.md](runs/exp01_feasibility.md).
+Coverage figures come from an initial 2026-09-17 sample (129 search results, 10 listing pages). They will be replaced with figures from the full collection run in [runs/](runs/).
 
 ## Target
 
@@ -47,4 +47,4 @@ Relisting group IDs are derived in preprocessing (normalized title + description
 | JSON-LD `itemCondition` | Lossy: a "Kuin uusi" (like new) listing was marked `NewCondition`. Use `condition`. |
 | `labels`, `ad_type`, `distance`, search `metadata` | No modelling value |
 
-`FORBIDDEN_KEYS` in `tori.py` lists these, and experiment 01 fails if any of them reaches a stored record.
+`FORBIDDEN_KEYS` in `tori.py` lists these, and the collector stops if any of them reaches a stored record.
