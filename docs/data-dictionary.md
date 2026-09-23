@@ -27,18 +27,21 @@ Coverage figures come from the full collection run on 2026-09-17: 2,178 listings
 
 ## Derived in preprocessing
 
-Planned, not collected: to be computed from the fields above in `priced_right/`, so the notebooks and the app share the same logic.
+Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv` (2,025 listings). Coverage is on the cleaned data.
 
-| Feature | From | Why |
-|---|---|---|
-| `exact_model` | `title`, `description`, `model_group` | "iPhone 15 Pro Max" instead of the coarse bucket |
-| `release_year` | `exact_model` | Device age drives used-phone prices more than listing age |
-| `battery_health_pct` | `title`, `description` | Common in iPhone ads ("akun kunto 91%") and price-relevant |
-| `mentions_warranty`, `mentions_receipt`, `mentions_box` | `description` | *takuu*, *kuitti*, *pakkaus/laatikko* |
-| `mentions_damage` | `title`, `description` | *rikki*, *halkeama*, *naarmu* |
-| `is_accessory` | `title`, `price_eur` | Filter out cases, screen protectors and spare parts |
-| `listing_age_days` | `published_at`, `collected_at` | 45 listings are older than 180 days |
-| `relisting_group` | normalized `title` + `description` + `municipality` | Grouped k-fold keeps relistings on one side of each split |
+| Feature | From | Coverage | Notes |
+|---|---|---|---|
+| `exact_model` | `title`, then `description` | 100% | e.g. "iPhone 15 Pro Max"; handles "12Pro", "13mini", "Phone 12", "Apple 15 pro max", "iPhone Air"; variants Apple never sold ("XR Max") drop to the base model. 48 models. |
+| `model_group` | `exact_model` | 100% | Tori's bucket, recomputed from the model: fills the 22% left empty and fixes 2 mis-tagged iPhones. `model_group_filled` marks the 428 changed rows. |
+| `release_year` | `exact_model` | 100% | Launch year, e.g. 6s → 2015, 16e → 2025; iPhone SE → 2020 |
+| `storage_gb` | `memory`, then title, then description | 96% | 8 GB – 2 TB; "Gt"/"Tt" are Finnish for GB/TB |
+| `battery_pct` | `title` + `description` | 51% | "Akun kunto 89%", "Battery health: 100%"; values 50–100 only |
+| `mentions_warranty`, `mentions_receipt`, `mentions_box` | `title` + `description` | 20%, 4%, 13% | *takuu*, *kuitti*, *pakkaus/laatikko*. Mentions, not facts: "ei takuuta" (no warranty) also counts. |
+| `mentions_damage` | `title` + `description` | 15% | *rikki*, *halkeama*, *särö*, *vaurio*, broken, crack; not "vaurioton"/"halkeamaton" (undamaged) |
+| `listing_age_days` | `published_at`, `collected_at` | 100% | Median 14 days; Tori resets `published_at` when a listing is renewed |
+| `relisting_group` | normalized `title` + first 120 characters of `description` | 100% | Same ad posted again, or a shop's template; GroupKFold keeps a group in one fold |
+
+Rows removed during cleaning (0 € and placeholder prices, accessories and spare parts, non-iPhones, no model, implausibly low prices) are counted in [results.md](results.md).
 
 ## Keys and metadata
 
@@ -47,7 +50,7 @@ Planned, not collected: to be computed from the fields above in `priced_right/`,
 | `listing_id` | string | Joins search and listing-page records; deduplication; basis for relisting groups. Do not publish: it leads back to the live listing. |
 | `collected_at` | datetime (UTC) | Run timestamp; listing age and dataset versioning |
 
-Relisting group IDs are derived in preprocessing (normalized title + description + municipality), so no extra field is collected for them.
+Relisting group IDs are derived in preprocessing (see above), so no extra field is collected for them.
 
 ## Available but deliberately not collected
 

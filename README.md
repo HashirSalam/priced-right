@@ -33,11 +33,11 @@ Where we are (updated 23 Sep). Tick items off below as they land.
 flowchart LR
     subgraph done["Done · 17–23 Sep"]
         direction TB
-        a["Repo and package<br/>17 Sep"] --> b["Tori crawler<br/>17 Sep"] --> c["Data: 2,178 iPhones<br/>17 Sep"] --> d["Privacy audit and fixes<br/>17 Sep"] --> e["Approach check<br/>23 Sep · model works"]
+        a["Repo and package<br/>17 Sep"] --> b["Tori crawler<br/>17 Sep"] --> c["Data: 2,178 iPhones<br/>17 Sep"] --> d["Privacy audit and fixes<br/>17 Sep"] --> s1["1. Preprocess and baselines<br/>23 Sep · Ridge RMSLE 0.29"]
     end
     subgraph next["Next · 23–27 Sep"]
         direction TB
-        s1["1. Preprocess and baselines<br/>Up now · Wed 23"] --> s2["2. EDA and Random Forest<br/>Wed–Fri"] --> s3["3. Search re-run<br/>Fri 25 · optional"] --> s4["4. Final model and app<br/>Sat 26 · MAPIE, fairness, Flask"] --> s5["5. Report and slides<br/>Sun 27"]
+        s2["2. EDA and Random Forest<br/>Up now · Wed–Fri"] --> s3["3. Search re-run<br/>Fri 25 · optional"] --> s4["4. Final model and app<br/>Sat 26 · MAPIE, fairness, Flask"] --> s5["5. Report and slides<br/>Sun 27"]
     end
     done --> next
 
@@ -45,9 +45,9 @@ flowchart LR
     classDef now fill:#EEEDFE,stroke:#534AB7,color:#3C3489
     classDef upcoming fill:#F1EFE8,stroke:#5F5E5A,color:#444441
     classDef optional fill:#F1EFE8,stroke:#5F5E5A,color:#444441,stroke-dasharray: 5 5
-    class a,b,c,d,e done
-    class s1 now
-    class s2,s4,s5 upcoming
+    class a,b,c,d,s1 done
+    class s2 now
+    class s4,s5 upcoming
     class s3 optional
     style done fill:none,stroke:#0F6E56
     style next fill:none,stroke:#534AB7
@@ -59,14 +59,10 @@ flowchart LR
 - [x] Tori crawler: robots.txt check, ≥3 s between requests, only needed fields, contact details scrubbed, pause/resume (17 Sep)
 - [x] Full iPhone run: 2,178 listings in `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` ([report](docs/runs/iphones_2026-09-17T110158Z.md))
 - [x] Privacy audit: missed contact details found and removed (see [privacy validation](docs/data-collection-notes.md#privacy-validation))
-- [x] Approach check (23 Sep): Ridge on text + fields beats the median baseline on RMSLE (0.43 vs 0.56); both average 63 € error
+- [x] **1. Preprocess and baselines (23 Sep):** 2,025 clean listings; Ridge (text + fields) RMSLE 0.285, 48 € average error, 13% median error vs. 0.377 / 57 € / 17% for the median by model + storage ([results](docs/results.md))
 
 ### Next
 
-- [ ] **1. Preprocess and baselines (Wed 23)**
-  - `preprocess.py`: drop 0 € swap ads, accessories (accessory word + under 40 €) and the 1 Samsung phone; relabel the 2 mis-tagged iPhones; add [derived features](docs/data-dictionary.md#derived-in-preprocessing) → `data/processed/iphones_clean.csv`
-  - `evaluate.py`: `GroupKFold` so copies of an ad stay together; preprocessing inside a `Pipeline`; RMSLE, MAE in €, median % error
-  - `models.py`: median baseline by model + storage, Ridge (TF-IDF + fields) on `log1p(price)`
 - [ ] **2. EDA and Random Forest (Wed–Fri):** prices by model, storage, condition, seller type and region; keyword associations; Random Forest (optionally gradient boosting)
 - [ ] **3. Search re-run (Fri 25, optional):** `collect_iphones --max-items 0` (~42 requests) to see which listings disappeared since 17 Sep
 - [ ] **4. Final model and app (Sat 26):** best model with MAPIE price ranges (stated coverage, e.g. 80%); fairness check of error and coverage by region and seller type; Flask app with seller and buyer modes
@@ -129,16 +125,23 @@ priced-right/
 ├── priced_right/                    all Python code, one package
 │   ├── tori.py                      Tori client: requests, robots.txt, parsing, privacy filter
 │   ├── collect_iphones.py           full iPhone collection (search + listing pages)
-│   └── progress.py                  live progress of a running collection
+│   ├── progress.py                  live progress of a running collection
+│   ├── preprocess.py                cleaning and derived features
+│   ├── evaluate.py                  GroupKFold scoring shared by all models
+│   └── models.py                    median baseline, Ridge; writes docs/results.md
+│
+├── tests/                           parser and model tests (uv run pytest)
 │
 ├── docs/
 │   ├── project-canvas.md            the mini project canvas
 │   ├── data-dictionary.md           fields we collect, why, and what we leave out
 │   ├── data-collection-notes.md     crawler rules and how Tori exposes its data
+│   ├── results.md                   cleaning funnel and model comparison (generated)
 │   └── runs/                        generated report for every run (committed)
 │
-└── data/                            collected data (committed; created by the collector)
-    └── raw/tori/iphones_<time>/     records, listings.csv, failures, log
+└── data/                            collected data (committed)
+    ├── raw/tori/iphones_<time>/     records, listings.csv, failures, log
+    └── processed/                   iphones_clean.csv, cleaning_log.json (rebuilt by preprocess.py)
 ```
 
 How the pieces fit together:
@@ -149,13 +152,17 @@ flowchart TB
     client --> collect["priced_right/collect_iphones.py"]
     collect --> raw["data/raw/tori/…/listings.csv<br/>committed"]
     collect --> reports["docs/runs/ report<br/>committed"]
-    raw -.-> planned["preprocess → models → Flask app<br/>planned"]
+    raw --> prep["priced_right/preprocess.py"]
+    prep --> clean["data/processed/iphones_clean.csv"]
+    clean --> models["priced_right/models.py<br/>+ evaluate.py"]
+    models --> results["docs/results.md"]
+    models -.-> planned["Flask app<br/>planned"]
 
     classDef code fill:#EEEDFE,stroke:#534AB7,color:#3C3489
     classDef data fill:#E1F5EE,stroke:#0F6E56,color:#085041
     classDef todo fill:#F1EFE8,stroke:#5F5E5A,color:#444441,stroke-dasharray: 5 5
-    class client,collect code
-    class raw,reports data
+    class client,collect,prep,models code
+    class raw,reports,clean,results data
     class planned todo
 ```
 
