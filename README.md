@@ -29,7 +29,7 @@ already gives us.
 
 ## Roadmap
 
-Where we are (updated 23 Sep). Tick items off below as they land.
+Where we are (updated 23 Sep). Tick items off below as they land; the full history is in [docs/project-log.md](docs/project-log.md).
 
 ```mermaid
 flowchart LR
@@ -149,6 +149,7 @@ priced-right/
 │   ├── data-dictionary.md           fields we collect, why, and what we leave out
 │   ├── data-collection-notes.md     crawler rules and how Tori exposes its data
 │   ├── results.md                   cleaning funnel and model comparison (generated)
+│   ├── project-log.md               dated history of work and decisions
 │   └── runs/                        generated report for every run (committed)
 │
 └── data/                            collected data (committed)
