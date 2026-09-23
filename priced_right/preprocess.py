@@ -35,11 +35,13 @@ ACCESSORY_RE = re.compile(
 PLACEHOLDER_MAX_PRICE = 5  # 1-4 € asks are placeholders ("make an offer"), not prices
 IMPLAUSIBLE_SHARE = 0.10  # under 10% of the model's median price, with no damage or parts mentioned
 DAMAGED_OR_PARTS_RE = re.compile(r"rikki|rikkinäi|viallin|varaos|korjau|lukittu|icloud|ei toimi|broken|parts|raato", re.I)
-NOT_A_PHONE_RE = re.compile(r"\b(?:ipad|watch|airpods|macbook|imac|samsung|galaxy|android|huawei|xiaomi)\b", re.I)
+# No trailing \b: Finnish inflects brand names ("Androidin", "Samsungin").
+NOT_A_PHONE_RE = re.compile(r"\b(?:ipad|watch|airpods|macbook|imac|samsung|galaxy|android|huawei|xiaomi)", re.I)
+LOT_RE = re.compile(r"\b\d+\s*kpl\b", re.I)  # "2 kpl" = 2 pieces: the price covers several phones
 
-# "iPhone 15 Pro Max", "iphone13mini", "Phone 12", "iPhone XS Max", "iPhone 16e", "iPhone Air"
+# "iPhone 15 Pro Max", "iphone13mini", "Phone 12", "iPhone XS Max", "iPhone 16e", "iPhone Air", "iPhone SE3"
 _MODEL_RE = re.compile(
-    r"\b(?:i\s?-?)?phone\s*(se|xr|xs|x|air|\d{1,2})(?!\d)"
+    r"\b(?:i\s?-?)?phone\s*(se[1-3]?|xr|xs|x|air|\d{1,2})(?!\d)"
     r"(?:(s|e|c)(?![a-z]))?"
     r"\s*(pro\s*max|promax|pro|max|plus|mini|air)?",
     re.I,
@@ -75,6 +77,12 @@ _BATTERY_RE = re.compile(
     r"|(\d{2,3})\s*%\s*(?:akku|battery)",
     re.I,
 )
+_PRICE_RE = re.compile(
+    r"(?:\b(?:hinta|hintapyyntö|hp|price)\w*\s*:?\s*)?"
+    r"(?<![\d.,])\d{1,4}(?:[ .]\d{3})?(?:[.,]\d{1,2})?\s*(?:€|eur\w*|euro\w*|(?P<e>e)\b)"
+    r"|\b(?:hinta|hintapyyntö|hp|price)\w*\s*:?\s*\d{1,4}(?:[ .]\d{3})?\b",
+    re.I,
+)
 _FLAGS = {
     "mentions_warranty": re.compile(r"takuu|warranty", re.I),
     "mentions_receipt": re.compile(r"kuitti|receipt", re.I),
@@ -91,24 +99,39 @@ def latest_run(raw_dir: Path = RAW_DIR) -> Path:
     return runs[-1]
 
 
-def parse_model(text: str) -> Optional[str]:
-    """Normalized model name, e.g. "iPhone 15 Pro Max", or None if no valid model is mentioned."""
+def _models_in(text: str) -> list[str]:
+    """Every valid model named in the text, in order of appearance."""
+    found = []
     for match in _MODEL_RE.finditer(text or ""):
         series, suffix, variant = (g.lower() if g else "" for g in match.groups())
+        series = "se" if series.startswith("se") else series  # "SE3" = 3rd-generation SE
         if series not in _SERIES:
             continue  # e.g. "iPhone 64GB": 64 is storage, not a model
         if series == "air" or variant == "air":
-            return "iPhone Air"  # sold as "iPhone Air", sometimes listed as "iPhone 17 Air"
+            found.append("iPhone Air")  # sold as "iPhone Air", sometimes listed as "iPhone 17 Air"
+            continue
         name = "iPhone " + (series.upper() if series.isalpha() else series + suffix)
         display = _VARIANTS[re.sub(r"\s+", " ", variant)] if variant else ""
         if display in _VALID_VARIANTS.get(series, set()) and suffix != "e":
             name += " " + display
-        return name
-    match = _APPLE_MODEL_RE.search(text or "")
-    if match:
+        found.append(name)
+    for match in _APPLE_MODEL_RE.finditer(text or ""):
         variant = _VARIANTS[re.sub(r"\s+", " ", match.group(2).lower())]
-        return f"iPhone {match.group(1)} {variant}"
-    return None
+        found.append(f"iPhone {match.group(1)} {variant}")
+    return found
+
+
+def parse_model(text: str) -> Optional[str]:
+    """Normalized model name, e.g. "iPhone 15 Pro Max": the first valid model named in the text, or None."""
+    models = _models_in(text)
+    return models[0] if models else None
+
+
+def model_from_description(text: str) -> Optional[str]:
+    """Model from a description only if it names exactly one: descriptions often compare with
+    other models ("same chip as iPhone 14") or list a bundle of phones."""
+    models = set(_models_in(text))
+    return models.pop() if len(models) == 1 else None
 
 
 def model_info(model: str) -> tuple[int, str]:
@@ -139,6 +162,17 @@ def parse_battery_pct(text: str) -> Optional[int]:
     return None
 
 
+def strip_prices(text: str) -> str:
+    """Remove prices ("750 €", "250e", "Hinta: 180") so text features can't read the asking price.
+
+    "16e" right after "iPhone" is a model name (iPhone 16e), not a price, and is kept.
+    """
+    def replace(match: re.Match) -> str:
+        before = text[max(0, match.start() - 7):match.start()].lower()
+        return match.group(0) if match.group("e") and before.rstrip().endswith("phone") else " "
+    return _PRICE_RE.sub(replace, text or "")
+
+
 def relisting_key(title: str, description: str) -> str:
     """Same title and description opening means the same ad posted again (or a shop's template)."""
     normalize = lambda s: re.sub(r"\W+", " ", (s or "").lower()).strip()
@@ -163,11 +197,12 @@ def clean(raw: pd.DataFrame) -> tuple[pd.DataFrame, list[dict]]:
          f"accessories and spare parts (under {ACCESSORY_MAX_PRICE} €)")
     drop(df["title"].str.contains(NOT_A_PHONE_RE) & ~df["title"].str.contains(r"iphone", case=False),
          "not an iPhone (iPad, Watch, Samsung, …)")
+    drop(df["title"].str.contains(LOT_RE), 'several phones in one ad ("2 kpl")')
 
     from_title = df["title"].map(parse_model)
-    from_description = df["description"].map(parse_model)
+    from_description = df["description"].map(model_from_description)
     df["exact_model"] = from_title.fillna(from_description)
-    drop(df["exact_model"].isna(), "no iPhone model in title or description")
+    drop(df["exact_model"].isna(), "no single iPhone model in title or description")
 
     model_median = df.groupby("exact_model")["price_eur"].transform("median")
     damaged = (df["title"] + " " + df["description"]).str.contains(DAMAGED_OR_PARTS_RE)

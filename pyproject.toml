@@ -16,7 +16,7 @@ authors = [
 dependencies = [
     "numpy>=2.0",
     "pandas>=2.2",
-    "scikit-learn>=1.5",
+    "scikit-learn>=1.6",  # GroupKFold(shuffle=...) needs 1.6
     "matplotlib>=3.9",
     "seaborn>=0.13",
     "flask>=3.0",

@@ -15,7 +15,7 @@ Coverage figures come from the full collection run on 2026-09-17: 2,178 listings
 | Field | Type | Source | Coverage | Used for (canvas) |
 |---|---|---|---|---|
 | `title` | text | search results | 100% | TF-IDF; parse the exact model ("15 Pro Max"), release year, storage, colour, battery %; flag accessories and spare parts. Contact details scrubbed like descriptions. |
-| `description` | text | listing page | 100% | TF-IDF, description length, keyword flags (battery health, warranty *takuu*, receipt *kuitti*, box *pakkaus/laatikko*, damage *rikki/halkeama/naarmu*). Contact details are replaced with `[url]` (personal pages, social profiles), `[email]`, `[phone]` or `[number]` at collection time (154 descriptions, 7%). Median length 268 characters. |
+| `description` | text | listing page | 100% | TF-IDF, description length, keyword flags (battery health, warranty *takuu*, receipt *kuitti*, box *pakkaus/laatikko*, damage *rikki/halkeama/naarmu*). Contact details are replaced with `[url]` (personal pages, social profiles), `[email]`, `[phone]` or `[number]` at collection time (154 descriptions, 7%). Median length 268 characters. Prices written in the text ("750 €", "250e", "Hinta: 180") are removed before TF-IDF, since 10% of ads repeat their own asking price. |
 | `condition` | category | listing page | 96% | 5 levels: Uusi, Kuin uusi, Hyvä, Kohtalainen, Vaatii korjausta. Keep missing as its own category. |
 | `model_group` | category | listing page | 78% | Tori's 8 coarse buckets, e.g. `iPhone 15/Plus/Pro/Max`. 22% of sellers leave it empty, so parse the exact model from the title. 3 listings have a Galaxy group: drop the 1 real Samsung phone and relabel the 2 mis-tagged iPhones from their titles. |
 | `memory` | category | search results | 88% | 16 GB – 1 TB, plus `Muu` (other); missing stays its own category |
@@ -27,12 +27,12 @@ Coverage figures come from the full collection run on 2026-09-17: 2,178 listings
 
 ## Derived in preprocessing
 
-Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv` (2,025 listings). Coverage is on the cleaned data.
+Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv` (2,015 listings). Coverage is on the cleaned data.
 
 | Feature | From | Coverage | Notes |
 |---|---|---|---|
-| `exact_model` | `title`, then `description` | 100% | e.g. "iPhone 15 Pro Max"; handles "12Pro", "13mini", "Phone 12", "Apple 15 pro max", "iPhone Air"; variants Apple never sold ("XR Max") drop to the base model. 48 models. |
-| `model_group` | `exact_model` | 100% | Tori's bucket, recomputed from the model: fills the 22% left empty and fixes 2 mis-tagged iPhones. `model_group_filled` marks the 428 changed rows. |
+| `exact_model` | `title`, else `description` if it names exactly one model | 100% | e.g. "iPhone 15 Pro Max"; handles "12Pro", "13mini", "Phone 12", "Apple 15 pro max", "iPhone Air", "SE3"; variants Apple never sold ("XR Max") drop to the base model. Descriptions naming several models (comparisons, bundles) are not used. 48 models. |
+| `model_group` | `exact_model` | 100% | Tori's bucket, recomputed from the model: fills the 22% left empty and fixes 2 mis-tagged iPhones. `model_group_filled` marks the 407 changed rows. |
 | `release_year` | `exact_model` | 100% | Launch year, e.g. 6s → 2015, 16e → 2025; iPhone SE → 2020 |
 | `storage_gb` | `memory`, then title, then description | 96% | 8 GB – 2 TB; "Gt"/"Tt" are Finnish for GB/TB |
 | `battery_pct` | `title` + `description` | 51% | "Akun kunto 89%", "Battery health: 100%"; values 50–100 only |

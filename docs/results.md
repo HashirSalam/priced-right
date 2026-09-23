@@ -12,18 +12,19 @@ Source run `iphones_2026-09-17T110158Z`, cleaned by `priced_right/preprocess.py`
 | price 0 € (swap offers) | 8 | 2170 |
 | placeholder price (under 5 €) | 12 | 2158 |
 | accessories and spare parts (under 40 €) | 78 | 2080 |
-| not an iPhone (iPad, Watch, Samsung, …) | 13 | 2067 |
-| no iPhone model in title or description | 38 | 2029 |
-| implausibly low price (under 10% of model median, not damaged) | 4 | 2025 |
+| not an iPhone (iPad, Watch, Samsung, …) | 14 | 2066 |
+| several phones in one ad ("2 kpl") | 5 | 2061 |
+| no single iPhone model in title or description | 42 | 2019 |
+| implausibly low price (under 10% of model median, not damaged) | 4 | 2015 |
 
-48 distinct models. Coverage: storage 96%, battery % 51%, condition 96%.
+48 distinct models. Coverage: storage 96%, battery % 51%, condition 97%.
 
 ## Models
 
-5-fold GroupKFold on 2025 listings (copies of an ad stay in one fold), seed 42. Trained on log1p(price); mean ± std over folds.
+5-fold GroupKFold on 2015 listings (copies of an ad stay in one fold), seed 42. Trained on log1p(price); mean ± std over folds.
 
 | Model | RMSLE | MAE (€) | Median % error |
 |---|---|---|---|
-| Overall median | 0.913 ± 0.031 | 199 ± 11 | 53.2% ± 4.3% |
-| Median by model + storage | 0.377 ± 0.039 | 57 ± 5 | 16.5% ± 1.3% |
-| Ridge (text + fields) | 0.285 ± 0.031 | 48 ± 1 | 13.3% ± 0.4% |
+| Overall median | 0.908 ± 0.051 | 200 ± 10 | 53.6% ± 2.5% |
+| Median by model + storage | 0.378 ± 0.037 | 58 ± 1 | 16.9% ± 1.9% |
+| Ridge (text + fields) | 0.280 ± 0.024 | 49 ± 2 | 13.3% ± 0.7% |

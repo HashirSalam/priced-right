@@ -23,26 +23,31 @@
     },
     {
       "step": "not an iPhone (iPad, Watch, Samsung, …)",
-      "removed": 13,
-      "rows": 2067
+      "removed": 14,
+      "rows": 2066
     },
     {
-      "step": "no iPhone model in title or description",
-      "removed": 38,
-      "rows": 2029
+      "step": "several phones in one ad (\"2 kpl\")",
+      "removed": 5,
+      "rows": 2061
+    },
+    {
+      "step": "no single iPhone model in title or description",
+      "removed": 42,
+      "rows": 2019
     },
     {
       "step": "implausibly low price (under 10% of model median, not damaged)",
       "removed": 4,
-      "rows": 2025
+      "rows": 2015
     }
   ],
   "coverage": {
-    "storage_gb": 0.959,
-    "battery_pct": 0.508,
-    "condition": 0.965
+    "storage_gb": 0.961,
+    "battery_pct": 0.51,
+    "condition": 0.966
   },
-  "model_group_filled_from_title": 413,
+  "model_group_filled_from_title": 407,
   "distinct_models": 48,
   "relisting_groups_with_copies": 29
 }

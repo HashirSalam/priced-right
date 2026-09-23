@@ -20,7 +20,7 @@ from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 
 from priced_right import evaluate
-from priced_right.preprocess import PROCESSED_DIR, REPO_ROOT
+from priced_right.preprocess import PROCESSED_DIR, REPO_ROOT, strip_prices
 
 CATEGORICAL = ["exact_model", "model_group", "storage_gb", "condition", "seller_type", "region"]
 NUMERIC = ["release_year", "battery_pct", "listing_age_days"]
@@ -53,6 +53,11 @@ class MedianBaseline(RegressorMixin, BaseEstimator):
         return np.array(preds)
 
 
+def _text_for_tfidf(text: str) -> str:
+    """Lowercase and remove prices: 10% of ads repeat their own price in the text."""
+    return strip_prices(text).lower()
+
+
 def _as_category(X):
     return X.astype("string").fillna("missing")
 
@@ -62,10 +67,10 @@ def _as_float(X):
 
 
 def ridge_model(alpha: float = 1.0) -> Pipeline:
-    """TF-IDF on title and description plus one-hot and scaled fields, then Ridge regression."""
+    """TF-IDF on title and description (prices removed) plus one-hot and scaled fields, then Ridge regression."""
     features = ColumnTransformer([
-        ("title", TfidfVectorizer(ngram_range=(1, 2), min_df=2, sublinear_tf=True), "title"),
-        ("description", TfidfVectorizer(ngram_range=(1, 2), min_df=2, sublinear_tf=True), "description"),
+        ("title", TfidfVectorizer(preprocessor=_text_for_tfidf, ngram_range=(1, 2), min_df=2, sublinear_tf=True), "title"),
+        ("description", TfidfVectorizer(preprocessor=_text_for_tfidf, ngram_range=(1, 2), min_df=2, sublinear_tf=True), "description"),
         ("categorical", make_pipeline(FunctionTransformer(_as_category), OneHotEncoder(handle_unknown="ignore")), CATEGORICAL),
         ("numeric", make_pipeline(SimpleImputer(strategy="median", add_indicator=True), StandardScaler()), NUMERIC),
         ("flags", FunctionTransformer(_as_float), FLAGS),

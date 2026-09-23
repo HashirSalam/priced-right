@@ -33,7 +33,7 @@ Where we are (updated 23 Sep). Tick items off below as they land.
 flowchart LR
     subgraph done["Done · 17–23 Sep"]
         direction TB
-        a["Repo and package<br/>17 Sep"] --> b["Tori crawler<br/>17 Sep"] --> c["Data: 2,178 iPhones<br/>17 Sep"] --> d["Privacy audit and fixes<br/>17 Sep"] --> s1["1. Preprocess and baselines<br/>23 Sep · Ridge RMSLE 0.29"]
+        a["Repo and package<br/>17 Sep"] --> b["Tori crawler<br/>17 Sep"] --> c["Data: 2,178 iPhones<br/>17 Sep"] --> d["Privacy audit and fixes<br/>17 Sep"] --> s1["1. Preprocess and baselines<br/>23 Sep · Ridge RMSLE 0.28"]
     end
     subgraph next["Next · 23–27 Sep"]
         direction TB
@@ -59,7 +59,7 @@ flowchart LR
 - [x] Tori crawler: robots.txt check, ≥3 s between requests, only needed fields, contact details scrubbed, pause/resume (17 Sep)
 - [x] Full iPhone run: 2,178 listings in `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` ([report](docs/runs/iphones_2026-09-17T110158Z.md))
 - [x] Privacy audit: missed contact details found and removed (see [privacy validation](docs/data-collection-notes.md#privacy-validation))
-- [x] **1. Preprocess and baselines (23 Sep):** 2,025 clean listings; Ridge (text + fields) RMSLE 0.285, 48 € average error, 13% median error vs. 0.377 / 57 € / 17% for the median by model + storage ([results](docs/results.md))
+- [x] **1. Preprocess and baselines (23 Sep):** 2,015 clean listings; Ridge (text + fields) RMSLE 0.280, 49 € average error, 13% median error vs. 0.378 / 58 € / 17% for the median by model + storage ([results](docs/results.md))
 
 ### Next
 
