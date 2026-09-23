@@ -1,0 +1,53 @@
+{
+  "source_run": "iphones_2026-09-17T110158Z",
+  "steps": [
+    {
+      "step": "collected listings",
+      "removed": 0,
+      "rows": 2178
+    },
+    {
+      "step": "price 0 € (swap offers)",
+      "removed": 8,
+      "rows": 2170
+    },
+    {
+      "step": "placeholder price (under 5 €)",
+      "removed": 12,
+      "rows": 2158
+    },
+    {
+      "step": "accessories and spare parts (under 40 €)",
+      "removed": 78,
+      "rows": 2080
+    },
+    {
+      "step": "not an iPhone (iPad, Watch, Samsung, …)",
+      "removed": 14,
+      "rows": 2066
+    },
+    {
+      "step": "several phones in one ad (\"2 kpl\")",
+      "removed": 5,
+      "rows": 2061
+    },
+    {
+      "step": "no single iPhone model in title or description",
+      "removed": 42,
+      "rows": 2019
+    },
+    {
+      "step": "implausibly low price (under 10% of model median, not damaged)",
+      "removed": 4,
+      "rows": 2015
+    }
+  ],
+  "coverage": {
+    "storage_gb": 0.961,
+    "battery_pct": 0.51,
+    "condition": 0.966
+  },
+  "model_group_filled_from_title": 407,
+  "distinct_models": 48,
+  "relisting_groups_with_copies": 29
+}

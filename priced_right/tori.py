@@ -68,7 +68,7 @@ _PERSONAL_LINK_RE = re.compile(
 
 # Heuristic only: titles that look like accessories or spare parts rather than phones.
 ACCESSORY_TITLE_RE = re.compile(
-    r"\b(suoja)?kuor\w*|\bkotelo\w*|suojalasi\w*|panssarilasi\w*|takakan\w*|laturi\w*|kaapeli\w*|johto\w*|varaosa\w*|\bcase\b|\bcover\b",
+    r"\b(?:suoja)?kuor\w*|\bkotelo\w*|suojalasi\w*|panssarilasi\w*|takakan\w*|laturi\w*|kaapeli\w*|johto\w*|varaosa\w*|\bcase\b|\bcover\b",
     re.I,
 )
 
