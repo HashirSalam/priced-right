@@ -1,5 +1,7 @@
 # Priced Right?
 
+[![tests](https://github.com/HashirSalam/priced-right/actions/workflows/tests.yml/badge.svg)](https://github.com/HashirSalam/priced-right/actions/workflows/tests.yml)
+
 Estimating expected asking prices for second-hand listings.
 
 Group: Abtaal Aatif, Hashir Salam Awan, Hafiz Khu. Javid
@@ -112,6 +114,15 @@ pip install -r requirements-lock.txt
 pip install -e . --no-deps
 ```
 
+Run the checks before opening a PR:
+
+```bash
+uv run ruff check priced_right tests
+uv run pytest
+```
+
+GitHub Actions runs the same two checks on every PR and on `main` ([workflow](.github/workflows/tests.yml)), installing the exact versions from `requirements-lock.txt`.
+
 After adding or upgrading a dependency in `pyproject.toml`, refresh the lock file with `pip freeze --exclude-editable > requirements-lock.txt` and commit both files.
 
 ## Project structure
@@ -131,6 +142,7 @@ priced-right/
 │   └── models.py                    median baseline, Ridge; writes docs/results.md
 │
 ├── tests/                           parser and model tests (uv run pytest)
+├── .github/workflows/tests.yml      lint + tests on every PR
 │
 ├── docs/
 │   ├── project-canvas.md            the mini project canvas

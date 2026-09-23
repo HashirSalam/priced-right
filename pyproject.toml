@@ -29,3 +29,9 @@ dev = ["pytest>=8", "ruff>=0.6"]
 
 [tool.setuptools.packages.find]
 include = ["priced_right*"]
+
+[tool.ruff]
+target-version = "py311"  # oldest supported Python, so newer-only syntax is caught
+
+[tool.ruff.lint]
+select = ["F", "E9", "B"]  # errors and likely bugs, not style
