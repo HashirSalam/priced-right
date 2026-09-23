@@ -39,7 +39,7 @@ flowchart LR
         direction TB
         s1["1. Preprocess and baselines<br/>Up now · Wed 23"] --> s2["2. EDA and Random Forest<br/>Wed–Fri"] --> s3["3. Search re-run<br/>Fri 25 · optional"] --> s4["4. Final model and app<br/>Sat 26 · MAPIE, fairness, Flask"] --> s5["5. Report and slides<br/>Sun 27"]
     end
-    e --> s1
+    done --> next
 
     classDef done fill:#E1F5EE,stroke:#0F6E56,color:#085041
     classDef now fill:#EEEDFE,stroke:#534AB7,color:#3C3489
@@ -144,33 +144,18 @@ priced-right/
 How the pieces fit together:
 
 ```mermaid
-flowchart LR
-    tori[("Tori.fi")]
+flowchart TB
+    tori[("Tori.fi")] -->|search + listing pages| client["priced_right/tori.py<br/>requests · robots.txt<br/>parsing · privacy filter"]
+    client --> collect["priced_right/collect_iphones.py"]
+    collect --> raw["data/raw/tori/…/listings.csv<br/>committed"]
+    collect --> reports["docs/runs/ report<br/>committed"]
+    raw -.-> planned["preprocess → models → Flask app<br/>planned"]
 
-    subgraph pkg["priced_right/"]
-        client["tori.py<br/>requests · robots.txt<br/>parsing · privacy filter"]
-        collect["collect_iphones.py"]
-        progress["progress.py"]
-    end
-
-    subgraph datadir["data/ · committed"]
-        raw["raw/tori/iphones_…/<br/>listings.csv"]
-    end
-
-    subgraph runs["docs/runs/ · committed"]
-        reports["run reports<br/>.md + .json"]
-    end
-
-    planned["preprocessing → models → Flask app<br/>(planned)"]
-
-    tori -- "search + listing pages" --> client
-    client --> collect
-    collect -- "minimized records" --> raw
-    collect -- "aggregate summary" --> reports
-    raw -. "watches" .-> progress
-    raw -.-> planned
-
-    classDef todo stroke-dasharray: 5 5
+    classDef code fill:#EEEDFE,stroke:#534AB7,color:#3C3489
+    classDef data fill:#E1F5EE,stroke:#0F6E56,color:#085041
+    classDef todo fill:#F1EFE8,stroke:#5F5E5A,color:#444441,stroke-dasharray: 5 5
+    class client,collect code
+    class raw,reports data
     class planned todo
 ```
 
