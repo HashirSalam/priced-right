@@ -27,58 +27,56 @@ already gives us.
 
 ## Roadmap
 
-The project runs over two weekends. Tick items off here as they land.
+Where we are (updated 23 Sep). Tick items off below as they land.
 
 ```mermaid
-gantt
-    title Priced Right? timeline
-    dateFormat YYYY-MM-DD
-    axisFormat %a %d %b
-    section Data
-    Data collection                  :done, 2026-09-17, 1d
-    Setup and group decisions        :2026-09-18, 1d
-    Repeat collection (optional)     :2026-09-25, 1d
-    section Weekend 1
-    Preprocessing                    :2026-09-19, 1d
-    Evaluation setup and baseline    :2026-09-19, 1d
-    EDA                              :2026-09-19, 2d
-    Ridge and Random Forest          :2026-09-20, 1d
-    section Weekend 2
-    Final model and price ranges     :2026-09-26, 1d
-    Fairness check                   :2026-09-26, 1d
-    Flask app                        :2026-09-26, 1d
-    Report and presentation          :2026-09-27, 1d
+flowchart LR
+    subgraph done["Done · 17–23 Sep"]
+        direction TB
+        a["Repo and package<br/>17 Sep"] --> b["Tori crawler<br/>17 Sep"] --> c["Data: 2,178 iPhones<br/>17 Sep"] --> d["Privacy audit and fixes<br/>17 Sep"] --> e["Approach check<br/>23 Sep · model works"]
+    end
+    subgraph next["Next · 23–27 Sep"]
+        direction TB
+        s1["1. Preprocess and baselines<br/>Up now · Wed 23"] --> s2["2. EDA and Random Forest<br/>Wed–Fri"] --> s3["3. Search re-run<br/>Fri 25 · optional"] --> s4["4. Final model and app<br/>Sat 26 · MAPIE, fairness, Flask"] --> s5["5. Report and slides<br/>Sun 27"]
+    end
+    e --> s1
+
+    classDef done fill:#E1F5EE,stroke:#0F6E56,color:#085041
+    classDef now fill:#EEEDFE,stroke:#534AB7,color:#3C3489
+    classDef upcoming fill:#F1EFE8,stroke:#5F5E5A,color:#444441
+    classDef optional fill:#F1EFE8,stroke:#5F5E5A,color:#444441,stroke-dasharray: 5 5
+    class a,b,c,d,e done
+    class s1 now
+    class s2,s4,s5 upcoming
+    class s3 optional
+    style done fill:none,stroke:#0F6E56
+    style next fill:none,stroke:#534AB7
 ```
 
-### Done: data collection (Thu 17 Sep)
+### Done
 
-- [x] Tori.fi collector with crawler rules, privacy filtering and pause/resume
+- [x] Repo, `priced_right` package, docs (17 Sep)
+- [x] Tori crawler: robots.txt check, ≥3 s between requests, only needed fields, contact details scrubbed, pause/resume (17 Sep)
 - [x] Full iPhone run: 2,178 listings in `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` ([report](docs/runs/iphones_2026-09-17T110158Z.md))
+- [x] Privacy audit: missed contact details found and removed (see [privacy validation](docs/data-collection-notes.md#privacy-validation))
+- [x] Approach check (23 Sep): Ridge on text + fields beats the median baseline on RMSLE (0.43 vs 0.56); both average 63 € error
 
-### Before Saturday 19 Sep
+### Next
 
-- [ ] Everyone: `git pull` and set up the environment (see [Setup](#setup))
-- [ ] Decide on retailer listings (20% of the data): keep them with `seller_type` as a feature, model them separately, or drop them
-- [ ] Decide on daily snapshots: drop them, or run one repeat collection on Fri 25 Sep to see which listings disappeared
-- [ ] Split the work: preprocessing, EDA, modelling, app, report
-
-### Weekend 1 · Sat–Sun 19–20 Sep: clean data and first models
-
-- [ ] **Preprocessing:** drop accessories, 0 € swap ads and the 1 Samsung phone; relabel the 2 iPhones mis-tagged with a Galaxy model group; derive exact model, release year, battery %, and warranty/receipt/damage flags from title and description; fill in missing model and memory where the text allows; mark relistings → `data/processed/iphones_clean.csv` (features listed in [data-dictionary.md](docs/data-dictionary.md#derived-in-preprocessing))
-- [ ] **EDA:** prices by model, storage, condition, seller type and region; price spread; keyword associations → notebook and figures
-- [ ] **Evaluation setup:** `GroupKFold` so relistings stay together; fit all preprocessing (e.g. TF-IDF) inside the folds with a scikit-learn `Pipeline` to avoid leakage; report RMSLE, MAE in € and median % error → reusable function
-- [ ] **Models:** train on `log1p(price)`; median baseline by model and storage, Ridge (TF-IDF + fields), Random Forest, optionally gradient boosting → comparison table
+- [ ] **1. Preprocess and baselines (Wed 23)**
+  - `preprocess.py`: drop 0 € swap ads, accessories (accessory word + under 40 €) and the 1 Samsung phone; relabel the 2 mis-tagged iPhones; add [derived features](docs/data-dictionary.md#derived-in-preprocessing) → `data/processed/iphones_clean.csv`
+  - `evaluate.py`: `GroupKFold` so copies of an ad stay together; preprocessing inside a `Pipeline`; RMSLE, MAE in €, median % error
+  - `models.py`: median baseline by model + storage, Ridge (TF-IDF + fields) on `log1p(price)`
+- [ ] **2. EDA and Random Forest (Wed–Fri):** prices by model, storage, condition, seller type and region; keyword associations; Random Forest (optionally gradient boosting)
+- [ ] **3. Search re-run (Fri 25, optional):** `collect_iphones --max-items 0` (~42 requests) to see which listings disappeared since 17 Sep
+- [ ] **4. Final model and app (Sat 26):** best model with MAPIE price ranges (stated coverage, e.g. 80%); fairness check of error and coverage by region and seller type; Flask app with seller and buyer modes
+- [ ] **5. Report and slides (Sun 27):** methods, results, limitations ("asking prices, not sale prices")
 
 The median baseline is grouped by model and storage. If a fitted model does not clearly beat
 that lookup table, the finding is about the problem rather than about our modelling, and it
 belongs in the report either way.
 
-### Weekend 2 · Sat–Sun 26–27 Sep: app and report
-
-- [ ] **Final model:** pick the best model; price ranges with conformal prediction (MAPIE), so each range has a stated coverage (e.g. 80%) and widens for expensive phones; save the fitted pipeline for the app
-- [ ] **Fairness check:** error and range coverage by region and seller type; privacy and misuse discussion, using the [privacy validation and legal context](docs/data-collection-notes.md#privacy-validation) notes
-- [ ] **Flask app:** seller mode (expected price and range), buyer mode (below / in line / above comparable listings)
-- [ ] **Report and presentation**
+**Open decisions:** keep retailer listings with `seller_type` as a feature (recommended); run step 3 or not.
 
 ## Data source and collection policy
 
