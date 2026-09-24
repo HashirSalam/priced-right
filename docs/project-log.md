@@ -61,13 +61,13 @@ What was done, what was decided and why, in date order. Add a dated entry when w
 ## 24 Sep: exploratory data analysis
 
 - The team's first exploration (`data/processed/Untitled.ipynb`) was moved to `notebooks/0.0-team-first-look.ipynb` and kept as-is.
-- Wrote [notebooks/1.0-eda.ipynb](../notebooks/1.0-eda.ipynb): 10 documented sections, each saying what we look at and why, followed by the result and a takeaway. It compares groups with a **relative price** (price ÷ same-model median), so model differences don't hide other effects.
+- Wrote [notebooks/1.0-eda.ipynb](../notebooks/1.0-eda.ipynb): 10 documented sections, each saying what we look at and why, followed by the result and a takeaway. It compares groups with a **relative price**: price ÷ the median of the same model and storage (after a Codex review pointed out that storage mixes differ between groups), so the phone itself doesn't hide other effects.
 - Findings:
   - price is right-skewed, which supports log price
   - model/release year and storage dominate (Spearman 0.89 and 0.71)
-  - retailers ask ~28% more than private sellers for the same model
+  - retailers ask ~25% more than private sellers for the same model and storage
   - *fair* −30% and *needs repair* −60%, while the top three condition labels are used loosely
-  - battery below 80% −13%; damage mentions −14%, warranty mentions +12%
+  - battery below 80% −13%; damage mentions −14%, warranty mentions +10%
   - old models vary far more in price than new ones
   - Pohjanmaa's high prices come from its 79% retailer share, not the region
 - **Cleaning fixes** from what the EDA found (same PR):

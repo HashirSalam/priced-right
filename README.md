@@ -66,7 +66,7 @@ flowchart LR
 ### Next
 
 - [ ] **2. EDA and Random Forest (Wed–Fri):** prices by model, storage, condition, seller type and region; keyword associations; Random Forest (optionally gradient boosting)
-  - [x] EDA: [notebooks/1.0-eda.ipynb](notebooks/1.0-eda.ipynb) (24 Sep). Main findings: model and storage drive price; retailers ask ~28% more for the same model; condition matters mainly for *fair* (−30%) and *needs repair* (−60%); battery and damage mentions matter.
+  - [x] EDA: [notebooks/1.0-eda.ipynb](notebooks/1.0-eda.ipynb) (24 Sep). Main findings: model and storage drive price; retailers ask ~25% more for the same model and storage; condition matters mainly for *fair* (−30%) and *needs repair* (−60%); battery and damage mentions matter.
   - [x] Fixed the 4 cleaning issues the EDA found: storage read as a model, spare parts at any price, bundles, iPhone SE generations (24 Sep)
   - [ ] Random Forest
 - [ ] **3. Search re-run (Fri 25, optional):** `collect_iphones --max-items 0` (~42 requests) to see which listings disappeared since 17 Sep
