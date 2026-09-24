@@ -58,6 +58,20 @@ What was done, what was decided and why, in date order. Add a dated entry when w
 - GitHub Actions runs lint and tests on every PR and on `main` (about 75 s).
 - A ruleset on `main` requires a pull request (self-merge allowed), squash merging, the **lint and tests** check, an up-to-date branch, and all review conversations resolved. It also blocks force pushes and deletion, and requests Copilot review automatically. Repository admins can bypass it.
 
+## 24 Sep: exploratory data analysis
+
+- The team's first exploration (`data/processed/Untitled.ipynb`) was moved to `notebooks/0.0-team-first-look.ipynb` and kept as-is.
+- Wrote [notebooks/1.0-eda.ipynb](../notebooks/1.0-eda.ipynb): 10 documented sections, each saying what we look at and why, followed by the result and a takeaway. It compares groups with a **relative price** (price ÷ same-model median), so model differences don't hide other effects.
+- Findings:
+  - price is right-skewed, which supports log price
+  - model/release year and storage dominate (Spearman 0.89 and 0.71)
+  - retailers ask ~28% more than private sellers for the same model
+  - *fair* −30% and *needs repair* −60%, while the top three condition labels are used loosely
+  - battery below 80% −13%; damage mentions −14%, warranty mentions +12%
+  - old models vary far more in price than new ones
+  - Pohjanmaa's high prices come from its 79% retailer share, not the region
+- Cleaning issues found for `preprocess.py`: "iPhone 16 GB" read as the model iPhone 16; spare parts under other names (*takakamera*); iPhone SE generations lumped together (2nd 84 € vs 3rd 115 €); multi-model titles.
+
 ## Decisions
 
 | Decision | Why | When |

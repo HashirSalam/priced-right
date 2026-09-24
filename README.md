@@ -66,6 +66,8 @@ flowchart LR
 ### Next
 
 - [ ] **2. EDA and Random Forest (Wed–Fri):** prices by model, storage, condition, seller type and region; keyword associations; Random Forest (optionally gradient boosting)
+  - [x] EDA: [notebooks/1.0-eda.ipynb](notebooks/1.0-eda.ipynb) (24 Sep). Main findings: model and storage drive price; retailers ask ~28% more for the same model; condition matters mainly for *fair* (−30%) and *needs repair* (−60%); battery and damage mentions matter.
+  - [ ] Fix the 4 cleaning issues found in the EDA (section 9), then add Random Forest
 - [ ] **3. Search re-run (Fri 25, optional):** `collect_iphones --max-items 0` (~42 requests) to see which listings disappeared since 17 Sep
 - [ ] **4. Final model and app (Sat 26):** best model with MAPIE price ranges (stated coverage, e.g. 80%); fairness check of error and coverage by region and seller type; Flask app with seller and buyer modes
 - [ ] **5. Report and slides (Sun 27):** methods, results, limitations ("asking prices, not sale prices")
@@ -140,6 +142,10 @@ priced-right/
 │   ├── preprocess.py                cleaning and derived features
 │   ├── evaluate.py                  GroupKFold scoring shared by all models
 │   └── models.py                    median baseline, Ridge; writes docs/results.md
+│
+├── notebooks/
+│   ├── 1.0-eda.ipynb                exploratory data analysis (documented, with charts)
+│   └── 0.0-team-first-look.ipynb    the team's first exploration, kept for history
 │
 ├── tests/                           parser and model tests (uv run pytest)
 ├── .github/workflows/tests.yml      lint + tests on every PR
