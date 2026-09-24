@@ -60,7 +60,7 @@ What was done, what was decided and why, in date order. Add a dated entry when w
 
 ## 24 Sep: exploratory data analysis
 
-- The team's first exploration (`data/processed/Untitled.ipynb`) was moved to `notebooks/0.0-team-first-look.ipynb` and kept as-is.
+- The team's first exploration (`data/processed/Untitled.ipynb`) was folded into the EDA notebook below and then removed; it stays in git history (commit 4274f3b).
 - Wrote [notebooks/1.0-eda.ipynb](../notebooks/1.0-eda.ipynb): 10 documented sections, each saying what we look at and why, followed by the result and a takeaway. It compares groups with a **relative price**: price ÷ the median of the same model and storage (after a Codex review pointed out that storage mixes differ between groups), so the phone itself doesn't hide other effects.
 - Findings:
   - price is right-skewed, which supports log price

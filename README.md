@@ -146,8 +146,7 @@ priced-right/
 │   └── models.py                    median baseline, Ridge; writes docs/results.md
 │
 ├── notebooks/
-│   ├── 1.0-eda.ipynb                exploratory data analysis (documented, with charts)
-│   └── 0.0-team-first-look.ipynb    the team's first exploration, kept for history
+│   └── 1.0-eda.ipynb                exploratory data analysis (documented, with charts)
 │
 ├── tests/                           parser and model tests (uv run pytest)
 ├── .github/workflows/tests.yml      lint + tests on every PR
