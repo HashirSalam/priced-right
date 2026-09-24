@@ -33,7 +33,7 @@ Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv`
 |---|---|---|---|
 | `exact_model` | `title`, else `description` if it names exactly one model | 100% | e.g. "iPhone 15 Pro Max"; handles "12Pro", "13mini", "Phone 12", "Apple 15 pro max", "iPhone Air"; variants Apple never sold ("XR Max") drop to the base model; "iPhone 16 GB" is storage, not a model. iPhone SE is split into 1st/2nd/3rd gen when the ad says ("SE 2", "3rd gen", "2022", "5G"; not Tori's "(2-3 gen)" label), otherwise plain "iPhone SE". Descriptions naming several models are not used. 51 models. |
 | `model_group` | `exact_model` | 100% | Tori's bucket, recomputed from the model: fills the 22% left empty and fixes 2 mis-tagged iPhones. `model_group_filled` marks the 407 changed rows. |
-| `release_year` | `exact_model` | 100% | Launch year, e.g. 6s → 2015, 16e → 2025; SE 1st/2nd/3rd gen → 2016/2020/2022, SE of unknown generation → 2020 |
+| `release_year` | `exact_model` | 100% | Launch year, e.g. 6s → 2015, 16e → 2025; SE 1st/2nd/3rd gen → 2016/2020/2022, SE of unknown generation → 2020. Not a Ridge input: it follows from `exact_model` (dropped 24 Sep). |
 | `storage_gb` | `memory`, then title, then description | 96% | 8 GB – 2 TB; "Gt"/"Tt" are Finnish for GB/TB |
 | `battery_pct` | `title` + `description` | 51% | "Akun kunto 89%", "Battery health: 100%"; values 50–100 only |
 | `mentions_warranty`, `mentions_receipt`, `mentions_box` | `title` + `description` | 20%, 4%, 12% | *takuu*, *kuitti*, *pakkaus/laatikko*. Negated or ended mentions don't count: "ei takuuta" (no warranty), "takuu päättyi" (warranty ended), "kuitti hukassa" (receipt lost), "ilman laatikkoa" (without box). |

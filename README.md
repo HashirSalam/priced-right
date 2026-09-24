@@ -61,7 +61,7 @@ flowchart LR
 - [x] Tori crawler: robots.txt check, ≥3 s between requests, only needed fields, contact details scrubbed, pause/resume (17 Sep)
 - [x] Full iPhone run: 2,178 listings in `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` ([report](docs/runs/iphones_2026-09-17T110158Z.md))
 - [x] Privacy audit: missed contact details found and removed (see [privacy validation](docs/data-collection-notes.md#privacy-validation))
-- [x] **1. Preprocess and baselines (23 Sep):** Ridge (text + fields) beats the median by model + storage; current numbers after the 24 Sep fixes: 2,007 clean listings, Ridge RMSLE 0.263 / 47 € / 13% vs. 0.367 / 56 € / 16% ([results](docs/results.md))
+- [x] **1. Preprocess and baselines (23 Sep):** Ridge (text + fields) beats the median by model + storage; current numbers after the 24 Sep fixes: 2,007 clean listings, Ridge RMSLE 0.262 / 48 € / 13% vs. 0.367 / 56 € / 16% ([results](docs/results.md))
 
 ### Next
 

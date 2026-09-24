@@ -23,7 +23,8 @@ from priced_right import evaluate
 from priced_right.preprocess import PROCESSED_DIR, REPO_ROOT, strip_prices
 
 CATEGORICAL = ["exact_model", "model_group", "storage_gb", "condition", "seller_type", "region"]
-NUMERIC = ["release_year", "battery_pct", "listing_age_days"]
+# release_year is left out: it follows from exact_model, and the feature check showed no loss without it (24 Sep)
+NUMERIC = ["battery_pct", "listing_age_days"]
 FLAGS = ["mentions_warranty", "mentions_receipt", "mentions_box", "mentions_damage", "shipping_available"]
 RESULTS_PATH = REPO_ROOT / "docs" / "results.md"
 
@@ -100,7 +101,6 @@ ABLATIONS = {
     "seller_type": dict(categorical=_without(CATEGORICAL, "seller_type")),
     "region": dict(categorical=_without(CATEGORICAL, "region")),
     "model_group": dict(categorical=_without(CATEGORICAL, "model_group")),
-    "release_year": dict(numeric=_without(NUMERIC, "release_year")),
     "battery_pct": dict(numeric=_without(NUMERIC, "battery_pct")),
     "listing_age_days": dict(numeric=_without(NUMERIC, "listing_age_days")),
     "the 4 mention flags": dict(flags=_without(FLAGS, *MENTIONS)),

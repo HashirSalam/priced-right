@@ -77,7 +77,9 @@ What was done, what was decided and why, in date order. Add a dated entry when w
   - iPhone SE is split by generation when the ad says: 1st 33 €, 2nd 80 €, 3rd 175 € median. Checking this found and fixed 3 bugs: Tori's "(2-3 gen)" label read as 3rd gen, "SE 2nd" without "gen", and "SE20".
 - **Negation-aware mention flags:** a keyword doesn't count when negated ("ei halkeamia" = no cracks, "halkeamia ei ole", "ei säröjä, lohkeamia, halkeamia") or followed by "ended/lost" ("takuu päättyi", "kuitti hukassa"). 31% of the damage flags had been denials. Damage flags dropped from 298 to 197, and the damage effect went from −14% to −22%.
 - **Feature check** (`models.py` → [results](results.md#which-features-earn-their-place)): Ridge re-scored with one feature group left out. Model (+0.019 RMSLE when removed), condition (+0.018) and text (+0.013) matter most. Seller type, battery, the flags and shipping add ~nothing to Ridge because the text covers them; region and release year are within noise. The flags still matter for Random Forest, which uses them instead of full text.
-- Result: 2,007 listings, 51 models. Ridge RMSLE 0.263, 47 € MAE, 13% median error; median by model + storage 0.367, 56 €, 16%. Tests: 93.
+- Result: 2,007 listings, 51 models. Ridge RMSLE 0.262, 48 € MAE (after dropping release year), 13% median error; median by model + storage 0.367, 56 €, 16%. Tests: 93.
+
+- **Release year dropped from Ridge:** it follows from `exact_model`; no loss without it (RMSLE 0.262 vs 0.263). Kept in the cleaned data and documented in the EDA notebook's summary.
 
 ## Decisions
 
@@ -90,6 +92,7 @@ What was done, what was decided and why, in date order. Add a dated entry when w
 | Log price, RMSLE, GroupKFold | Standard for price prediction; stops copies of an ad from leaking between folds | 17 Sep |
 | Flask for the app | Committed in the canvas; simple server-rendered forms | 23 Sep |
 | All changes through PRs | Review, tests and history for every change | 23 Sep |
+| Release year not a Ridge input | Redundant with `exact_model`; no loss in the feature check | 24 Sep |
 
 ## Open
 
