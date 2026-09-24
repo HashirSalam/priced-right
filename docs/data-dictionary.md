@@ -27,13 +27,13 @@ Coverage figures come from the full collection run on 2026-09-17: 2,178 listings
 
 ## Derived in preprocessing
 
-Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv` (2,015 listings). Coverage is on the cleaned data.
+Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv` (2,007 listings). Coverage is on the cleaned data.
 
 | Feature | From | Coverage | Notes |
 |---|---|---|---|
-| `exact_model` | `title`, else `description` if it names exactly one model | 100% | e.g. "iPhone 15 Pro Max"; handles "12Pro", "13mini", "Phone 12", "Apple 15 pro max", "iPhone Air", "SE3"; variants Apple never sold ("XR Max") drop to the base model. Descriptions naming several models (comparisons, bundles) are not used. 48 models. |
+| `exact_model` | `title`, else `description` if it names exactly one model | 100% | e.g. "iPhone 15 Pro Max"; handles "12Pro", "13mini", "Phone 12", "Apple 15 pro max", "iPhone Air"; variants Apple never sold ("XR Max") drop to the base model; "iPhone 16 GB" is storage, not a model. iPhone SE is split into 1st/2nd/3rd gen when the ad says ("SE 2", "3rd gen", "2022", "5G"; not Tori's "(2-3 gen)" label), otherwise plain "iPhone SE". Descriptions naming several models are not used. 51 models. |
 | `model_group` | `exact_model` | 100% | Tori's bucket, recomputed from the model: fills the 22% left empty and fixes 2 mis-tagged iPhones. `model_group_filled` marks the 407 changed rows. |
-| `release_year` | `exact_model` | 100% | Launch year, e.g. 6s → 2015, 16e → 2025; iPhone SE → 2020 |
+| `release_year` | `exact_model` | 100% | Launch year, e.g. 6s → 2015, 16e → 2025; SE 1st/2nd/3rd gen → 2016/2020/2022, SE of unknown generation → 2020 |
 | `storage_gb` | `memory`, then title, then description | 96% | 8 GB – 2 TB; "Gt"/"Tt" are Finnish for GB/TB |
 | `battery_pct` | `title` + `description` | 51% | "Akun kunto 89%", "Battery health: 100%"; values 50–100 only |
 | `mentions_warranty`, `mentions_receipt`, `mentions_box` | `title` + `description` | 20%, 4%, 13% | *takuu*, *kuitti*, *pakkaus/laatikko*. Mentions, not facts: "ei takuuta" (no warranty) also counts. |
@@ -41,7 +41,7 @@ Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv`
 | `listing_age_days` | `published_at`, `collected_at` | 100% | Median 14 days; Tori resets `published_at` when a listing is renewed |
 | `relisting_group` | normalized `title` + first 120 characters of `description` | 100% | Same ad posted again, or a shop's template; GroupKFold keeps a group in one fold |
 
-Rows removed during cleaning (0 € and placeholder prices, accessories and spare parts, non-iPhones, no model, implausibly low prices) are counted in [results.md](results.md).
+Rows removed during cleaning (0 € and placeholder prices, accessories and spare parts, non-iPhones, multi-phone lots and bundles, no single model, implausibly low prices) are counted in [results.md](results.md).
 
 ## Keys and metadata
 

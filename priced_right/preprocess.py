@@ -38,10 +38,18 @@ DAMAGED_OR_PARTS_RE = re.compile(r"rikki|rikkinäi|viallin|varaos|korjau|lukittu
 # No trailing \b: Finnish inflects brand names ("Androidin", "Samsungin").
 NOT_A_PHONE_RE = re.compile(r"\b(?:ipad|watch|airpods|macbook|imac|samsung|galaxy|android|huawei|xiaomi)", re.I)
 LOT_RE = re.compile(r"\b\d+\s*kpl\b", re.I)  # "2 kpl" = 2 pieces: the price covers several phones
+# Two models joined by "/" ("iPhone 12/ 12 pro max"): unclear which phone is for sale
+MULTI_MODEL_RE = re.compile(r"phone\s*(?:\d{1,2}|se|xr|xs|x)[a-z ]*\s*/\s*(?:\d{1,2}|se|xr|xs|x|pro|max|plus|mini)\b", re.I)
+# Spare parts, dropped at any price: an original screen or camera can cost more than 40 €.
+PART_RE = re.compile(
+    r"takakamera|etukamera|kamera\s*moduul|kameramoduul|emolevy|näyttömoduul|laturiportti|latausportti"
+    r"|\boled\b|\blcd\b|\bvaraosa\b|näyttöjä",
+    re.I,
+)
 
 # "iPhone 15 Pro Max", "iphone13mini", "Phone 12", "iPhone XS Max", "iPhone 16e", "iPhone Air", "iPhone SE3"
 _MODEL_RE = re.compile(
-    r"\b(?:i\s?-?)?phone\s*(se[1-3]?|xr|xs|x|air|\d{1,2})(?!\d)"
+    r"\b(?:i\s?-?)?phone\s*(se(?:2016|2020|2022|16|20|22|[1-3])?|xr|xs|x|air|\d{1,2})(?!\d)(?!\s*(?:gb|gt|tb|tt)\b)"  # "iPhone 16 GB" = storage
     r"(?:(s|e|c)(?![a-z]))?"
     r"\s*(pro\s*max|promax|pro|max|plus|mini|air)?",
     re.I,
@@ -61,6 +69,18 @@ _SERIES = {
     "air": (2025, "iPhone 17/Air/Pro/Max"),
 }
 _SUFFIX_YEAR_OFFSET = {"s": 1, "c": 1, "e": 1}  # 6s = 2015, 5c = 2013, 16e = 2025
+# iPhone SE generations: 1st 2016, 2nd 2020, 3rd 2022 (the only 5G SE). Explicit markers first, then years.
+_SE_NAMES = {1: "iPhone SE (1st gen)", 2: "iPhone SE (2nd gen)", 3: "iPhone SE (3rd gen)"}
+_SE_SUFFIX_GEN = {"1": 1, "16": 1, "2016": 1, "2": 2, "20": 2, "2020": 2, "3": 3, "22": 3, "2022": 3}  # "SE3", "SE20", "SE2022"
+_TORI_SE_LABEL_RE = re.compile(r"\(?\s*2\s*-\s*3\s*gen\s*\)?", re.I)  # Tori's bucket label "(2-3 gen)", not a generation
+_SE_INFO = {"iPhone SE": (2020, "iPhone SE (2-3 gen)"), "iPhone SE (1st gen)": (2016, "iPhone 2G-11"),
+            "iPhone SE (2nd gen)": (2020, "iPhone SE (2-3 gen)"), "iPhone SE (3rd gen)": (2022, "iPhone SE (2-3 gen)")}
+_SE_MARKERS = [
+    (3, re.compile(r"\bse\s?3\b|\b3rd\b|\b3\.?\s*(?:gen|sukupolvi)|(?:gen(?:eration)?|sukupolvi)\.?\s*3\b|\b5g\b", re.I)),
+    (2, re.compile(r"\bse\s?2\b|\b2nd\b|\b2\.?\s*(?:gen|sukupolvi)|(?:gen(?:eration)?|sukupolvi)\.?\s*2\b", re.I)),
+    (1, re.compile(r"\bse\s?1\b|\b1st\b|\b1\.?\s*(?:gen|sukupolvi)|(?:gen(?:eration)?|sukupolvi)\.?\s*1\b|ensimmäi", re.I)),
+]
+_SE_YEARS = [(3, re.compile(r"\b2022\b")), (2, re.compile(r"\b2020\b")), (1, re.compile(r"\b2016\b"))]
 _VARIANTS = {"promax": "Pro Max", "pro max": "Pro Max", "pro": "Pro", "max": "Max", "plus": "Plus", "mini": "Mini", "air": "Air"}
 # Variants Apple actually sold; others ("XR Max", "SE Pro") are dropped to the base model.
 _VALID_VARIANTS = {
@@ -104,7 +124,10 @@ def _models_in(text: str) -> list[str]:
     found = []
     for match in _MODEL_RE.finditer(text or ""):
         series, suffix, variant = (g.lower() if g else "" for g in match.groups())
-        series = "se" if series.startswith("se") else series  # "SE3" = 3rd-generation SE
+        if series.startswith("se"):
+            generation = _SE_SUFFIX_GEN.get(series[2:]) or se_generation(text)
+            found.append(_SE_NAMES.get(generation, "iPhone SE"))
+            continue
         if series not in _SERIES:
             continue  # e.g. "iPhone 64GB": 64 is storage, not a model
         if series == "air" or variant == "air":
@@ -134,8 +157,23 @@ def model_from_description(text: str) -> Optional[str]:
     return models.pop() if len(models) == 1 else None
 
 
+def se_generation(text: str, use_years: bool = True) -> Optional[int]:
+    """1, 2 or 3 for "SE 2", "2nd gen", "3. sukupolvi", "5G", "SE 2022"; None if unclear.
+
+    Years are only trusted in titles: a description's "2022" may be when the phone was bought.
+    """
+    text = _TORI_SE_LABEL_RE.sub(" ", text or "")
+    markers = _SE_MARKERS + (_SE_YEARS if use_years else [])
+    for generation, pattern in markers:
+        if pattern.search(text or ""):
+            return generation
+    return None
+
+
 def model_info(model: str) -> tuple[int, str]:
     """(release year, Tori model group) for a name returned by parse_model."""
+    if model in _SE_INFO:
+        return _SE_INFO[model]
     token = model.split()[1].lower()
     if token == "air":
         return _SERIES["air"]
@@ -198,10 +236,18 @@ def clean(raw: pd.DataFrame) -> tuple[pd.DataFrame, list[dict]]:
     drop(df["title"].str.contains(NOT_A_PHONE_RE) & ~df["title"].str.contains(r"iphone", case=False),
          "not an iPhone (iPad, Watch, Samsung, …)")
     drop(df["title"].str.contains(LOT_RE), 'several phones in one ad ("2 kpl")')
+    drop(df["title"].str.contains(PART_RE), "spare parts (camera, screen, …) at any price")
+    drop(df["title"].map(lambda t: len(set(_models_in(t))) > 1) | df["title"].str.contains(MULTI_MODEL_RE)
+         | df["title"].str.contains(NOT_A_PHONE_RE),
+         "bundles (several models, or an iPhone with other devices)")
 
     from_title = df["title"].map(parse_model)
     from_description = df["description"].map(model_from_description)
     df["exact_model"] = from_title.fillna(from_description)
+    # An SE without a generation in the title: take it from the description's explicit markers
+    unknown_se = df["exact_model"].eq("iPhone SE")
+    from_description_se = df.loc[unknown_se, "description"].map(lambda d: _SE_NAMES.get(se_generation(d, use_years=False)))
+    df.loc[unknown_se, "exact_model"] = from_description_se.fillna("iPhone SE")
     drop(df["exact_model"].isna(), "no single iPhone model in title or description")
 
     model_median = df.groupby("exact_model")["price_eur"].transform("median")

@@ -70,7 +70,12 @@ What was done, what was decided and why, in date order. Add a dated entry when w
   - battery below 80% −13%; damage mentions −14%, warranty mentions +12%
   - old models vary far more in price than new ones
   - Pohjanmaa's high prices come from its 79% retailer share, not the region
-- Cleaning issues found for `preprocess.py`: "iPhone 16 GB" read as the model iPhone 16; spare parts under other names (*takakamera*); iPhone SE generations lumped together (2nd 84 € vs 3rd 115 €); multi-model titles.
+- **Cleaning fixes** from what the EDA found (same PR):
+  - storage right after "iPhone" ("iPhone 16 GB") is no longer read as a model
+  - spare parts are dropped at any price (3), e.g. a rear camera (*takakamera*) or screens (*näyttöjä*)
+  - bundles are dropped (6): several models in one title ("iPhone 12/ 12 pro max") or an iPhone with an Apple Watch, iPad or Android phones
+  - iPhone SE is split by generation when the ad says: 1st 33 €, 2nd 80 €, 3rd 175 € median. Checking this found and fixed 3 bugs: Tori's "(2-3 gen)" label read as 3rd gen, "SE 2nd" without "gen", and "SE20".
+- Result: 2,007 listings, 51 models. Ridge RMSLE 0.264, 47 € MAE, 13% median error; median by model + storage 0.367, 56 €, 16%. Tests: 72.
 
 ## Decisions
 
