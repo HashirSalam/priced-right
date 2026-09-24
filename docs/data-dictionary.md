@@ -36,8 +36,8 @@ Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv`
 | `release_year` | `exact_model` | 100% | Launch year, e.g. 6s → 2015, 16e → 2025; SE 1st/2nd/3rd gen → 2016/2020/2022, SE of unknown generation → 2020 |
 | `storage_gb` | `memory`, then title, then description | 96% | 8 GB – 2 TB; "Gt"/"Tt" are Finnish for GB/TB |
 | `battery_pct` | `title` + `description` | 51% | "Akun kunto 89%", "Battery health: 100%"; values 50–100 only |
-| `mentions_warranty`, `mentions_receipt`, `mentions_box` | `title` + `description` | 20%, 4%, 13% | *takuu*, *kuitti*, *pakkaus/laatikko*. Mentions, not facts: "ei takuuta" (no warranty) also counts. |
-| `mentions_damage` | `title` + `description` | 15% | *rikki*, *halkeama*, *särö*, *vaurio*, broken, crack; not "vaurioton"/"halkeamaton" (undamaged) |
+| `mentions_warranty`, `mentions_receipt`, `mentions_box` | `title` + `description` | 20%, 4%, 12% | *takuu*, *kuitti*, *pakkaus/laatikko*. Negated or ended mentions don't count: "ei takuuta" (no warranty), "takuu päättyi" (warranty ended), "kuitti hukassa" (receipt lost), "ilman laatikkoa" (without box). |
+| `mentions_damage` | `title` + `description` | 10% | *rikki*, *halkeama*, *särö*, *lohkeama*, *vaurio*, broken, crack; not "vaurioton"/"halkeamaton" (undamaged). Negations don't count: "ei halkeamia", "halkeamia ei ole", "ei säröjä, lohkeamia, halkeamia" (one "ei" negating a list). About 2 of 197 flags are subtler denials that still count. |
 | `listing_age_days` | `published_at`, `collected_at` | 100% | Median 14 days; Tori resets `published_at` when a listing is renewed |
 | `relisting_group` | normalized `title` + first 120 characters of `description` | 100% | Same ad posted again, or a shop's template; GroupKFold keeps a group in one fold |
 

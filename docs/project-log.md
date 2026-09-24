@@ -67,7 +67,7 @@ What was done, what was decided and why, in date order. Add a dated entry when w
   - model/release year and storage dominate (Spearman 0.89 and 0.71)
   - retailers ask ~25% more than private sellers for the same model and storage
   - *fair* −30% and *needs repair* −60%, while the top three condition labels are used loosely
-  - battery below 80% −13%; damage mentions −14%, warranty mentions +10%
+  - battery below 80% −13%; damage mentions −22% (after the negation fix below), warranty mentions +10%
   - old models vary far more in price than new ones
   - Pohjanmaa's high prices come from its 79% retailer share, not the region
 - **Cleaning fixes** from what the EDA found (same PR):
@@ -75,7 +75,9 @@ What was done, what was decided and why, in date order. Add a dated entry when w
   - spare parts are dropped at any price (3), e.g. a rear camera (*takakamera*) or screens (*näyttöjä*)
   - bundles are dropped (6): several models in one title ("iPhone 12/ 12 pro max") or an iPhone with an Apple Watch, iPad or Android phones
   - iPhone SE is split by generation when the ad says: 1st 33 €, 2nd 80 €, 3rd 175 € median. Checking this found and fixed 3 bugs: Tori's "(2-3 gen)" label read as 3rd gen, "SE 2nd" without "gen", and "SE20".
-- Result: 2,007 listings, 51 models. Ridge RMSLE 0.264, 47 € MAE, 13% median error; median by model + storage 0.367, 56 €, 16%. Tests: 72.
+- **Negation-aware mention flags:** a keyword doesn't count when negated ("ei halkeamia" = no cracks, "halkeamia ei ole", "ei säröjä, lohkeamia, halkeamia") or followed by "ended/lost" ("takuu päättyi", "kuitti hukassa"). 31% of the damage flags had been denials. Damage flags dropped from 298 to 197, and the damage effect went from −14% to −22%.
+- **Feature check** (`models.py` → [results](results.md#which-features-earn-their-place)): Ridge re-scored with one feature group left out. Model (+0.019 RMSLE when removed), condition (+0.018) and text (+0.013) matter most. Seller type, battery, the flags and shipping add ~nothing to Ridge because the text covers them; region and release year are within noise. The flags still matter for Random Forest, which uses them instead of full text.
+- Result: 2,007 listings, 51 models. Ridge RMSLE 0.263, 47 € MAE, 13% median error; median by model + storage 0.367, 56 €, 16%. Tests: 93.
 
 ## Decisions
 

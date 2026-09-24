@@ -66,16 +66,57 @@ def _as_float(X):
     return X.astype(float)
 
 
-def ridge_model(alpha: float = 1.0) -> Pipeline:
-    """TF-IDF on title and description (prices removed) plus one-hot and scaled fields, then Ridge regression."""
-    features = ColumnTransformer([
-        ("title", TfidfVectorizer(preprocessor=_text_for_tfidf, ngram_range=(1, 2), min_df=2, sublinear_tf=True), "title"),
-        ("description", TfidfVectorizer(preprocessor=_text_for_tfidf, ngram_range=(1, 2), min_df=2, sublinear_tf=True), "description"),
-        ("categorical", make_pipeline(FunctionTransformer(_as_category), OneHotEncoder(handle_unknown="ignore")), CATEGORICAL),
-        ("numeric", make_pipeline(SimpleImputer(strategy="median", add_indicator=True), StandardScaler()), NUMERIC),
-        ("flags", FunctionTransformer(_as_float), FLAGS),
-    ])
-    return make_pipeline(features, Ridge(alpha=alpha))
+def _tfidf() -> TfidfVectorizer:
+    return TfidfVectorizer(preprocessor=_text_for_tfidf, ngram_range=(1, 2), min_df=2, sublinear_tf=True)
+
+
+def ridge_model(alpha: float = 1.0, categorical: Sequence[str] = CATEGORICAL, numeric: Sequence[str] = NUMERIC,
+                flags: Sequence[str] = FLAGS, text: bool = True) -> Pipeline:
+    """TF-IDF on title and description (prices removed) plus one-hot and scaled fields, then Ridge regression.
+
+    The column arguments let the feature check (ablation) leave one group out at a time.
+    """
+    parts = [("title", _tfidf(), "title"), ("description", _tfidf(), "description")] if text else []
+    if categorical:
+        parts.append(("categorical", make_pipeline(FunctionTransformer(_as_category), OneHotEncoder(handle_unknown="ignore")), list(categorical)))
+    if numeric:
+        parts.append(("numeric", make_pipeline(SimpleImputer(strategy="median", add_indicator=True), StandardScaler()), list(numeric)))
+    if flags:
+        parts.append(("flags", FunctionTransformer(_as_float), list(flags)))
+    return make_pipeline(ColumnTransformer(parts), Ridge(alpha=alpha))
+
+
+def _without(columns: Sequence[str], *removed: str) -> list:
+    return [c for c in columns if c not in removed]
+
+
+MENTIONS = ["mentions_warranty", "mentions_receipt", "mentions_box", "mentions_damage"]
+# Feature check: Ridge re-scored with one feature group left out. Worse without it = the group helps.
+ABLATIONS = {
+    "text (title + description)": dict(text=False),
+    "exact_model": dict(categorical=_without(CATEGORICAL, "exact_model")),
+    "storage_gb": dict(categorical=_without(CATEGORICAL, "storage_gb")),
+    "condition": dict(categorical=_without(CATEGORICAL, "condition")),
+    "seller_type": dict(categorical=_without(CATEGORICAL, "seller_type")),
+    "region": dict(categorical=_without(CATEGORICAL, "region")),
+    "model_group": dict(categorical=_without(CATEGORICAL, "model_group")),
+    "release_year": dict(numeric=_without(NUMERIC, "release_year")),
+    "battery_pct": dict(numeric=_without(NUMERIC, "battery_pct")),
+    "listing_age_days": dict(numeric=_without(NUMERIC, "listing_age_days")),
+    "the 4 mention flags": dict(flags=_without(FLAGS, *MENTIONS)),
+    "shipping_available": dict(flags=_without(FLAGS, "shipping_available")),
+}
+
+
+def ablation(df: pd.DataFrame) -> pd.DataFrame:
+    """Cross-validated Ridge scores with each feature group removed, compared with all features."""
+    full = evaluate.cross_validate(ridge_model(), df)
+    rows = [{"removed": "nothing (all features)", "rmsle": full.rmsle.mean(), "mae_eur": full.mae_eur.mean(), "change": 0.0}]
+    for name, kwargs in ABLATIONS.items():
+        folds = evaluate.cross_validate(ridge_model(**kwargs), df)
+        rows.append({"removed": name, "rmsle": folds.rmsle.mean(), "mae_eur": folds.mae_eur.mean(),
+                     "change": folds.rmsle.mean() - full.rmsle.mean()})
+    return pd.DataFrame(rows)
 
 
 CANDIDATES = {
@@ -92,11 +133,14 @@ def main() -> None:
         folds = evaluate.cross_validate(model, df)
         rows.append({"model": name, **{f"{m}_{stat}": getattr(folds[m], stat)() for m in ("rmsle", "mae_eur", "median_ape") for stat in ("mean", "std")}})
         print(f"{name:28} RMSLE {folds.rmsle.mean():.3f} ± {folds.rmsle.std():.3f} | MAE {folds.mae_eur.mean():.0f} € | median error {folds.median_ape.mean():.0%}")
-    RESULTS_PATH.write_text(render_results(pd.DataFrame(rows), json.loads((PROCESSED_DIR / "cleaning_log.json").read_text()), len(df)))
+    features = ablation(df)
+    for r in features.itertuples():
+        print(f"  without {r.removed:28} RMSLE {r.rmsle:.3f} ({r.change:+.3f})")
+    RESULTS_PATH.write_text(render_results(pd.DataFrame(rows), json.loads((PROCESSED_DIR / "cleaning_log.json").read_text()), len(df), features))
     print(f"wrote {RESULTS_PATH.relative_to(REPO_ROOT)}")
 
 
-def render_results(results: pd.DataFrame, cleaning: dict, n_rows: int) -> str:
+def render_results(results: pd.DataFrame, cleaning: dict, n_rows: int, features: pd.DataFrame) -> str:
     lines = [
         "# Results",
         "",
@@ -122,6 +166,16 @@ def render_results(results: pd.DataFrame, cleaning: dict, n_rows: int) -> str:
         "|---|---|---|---|",
         *[f"| {r.model} | {r.rmsle_mean:.3f} ± {r.rmsle_std:.3f} | {r.mae_eur_mean:.0f} ± {r.mae_eur_std:.0f} | "
           f"{r.median_ape_mean:.1%} ± {r.median_ape_std:.1%} |" for r in results.itertuples()],
+        "",
+        "## Which features earn their place",
+        "",
+        "Ridge re-scored with one feature group left out (same folds). A positive change means the model is worse "
+        "without that group, so the group helps; around ±0.002 is noise.",
+        "",
+        "| Left out | RMSLE | Change | MAE (€) |",
+        "|---|---|---|---|",
+        *[f"| {r.removed} | {r.rmsle:.3f} | {r.change:+.3f} | {r.mae_eur:.1f} |"
+          for r in features.sort_values("change", ascending=False).itertuples()],
         "",
     ]
     return "\n".join(lines)

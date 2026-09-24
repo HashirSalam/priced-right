@@ -29,4 +29,24 @@ Source run `iphones_2026-09-17T110158Z`, cleaned by `priced_right/preprocess.py`
 |---|---|---|---|
 | Overall median | 0.910 ± 0.015 | 199 ± 9 | 54.0% ± 3.5% |
 | Median by model + storage | 0.367 ± 0.009 | 56 ± 4 | 16.4% ± 0.9% |
-| Ridge (text + fields) | 0.264 ± 0.007 | 47 ± 1 | 13.3% ± 0.3% |
+| Ridge (text + fields) | 0.263 ± 0.006 | 47 ± 1 | 13.3% ± 0.4% |
+
+## Which features earn their place
+
+Ridge re-scored with one feature group left out (same folds). A positive change means the model is worse without that group, so the group helps; around ±0.002 is noise.
+
+| Left out | RMSLE | Change | MAE (€) |
+|---|---|---|---|
+| exact_model | 0.283 | +0.019 | 50.2 |
+| condition | 0.282 | +0.018 | 50.1 |
+| text (title + description) | 0.277 | +0.013 | 49.6 |
+| model_group | 0.266 | +0.003 | 47.5 |
+| listing_age_days | 0.266 | +0.003 | 48.7 |
+| storage_gb | 0.266 | +0.002 | 47.7 |
+| seller_type | 0.264 | +0.001 | 46.9 |
+| battery_pct | 0.264 | +0.001 | 47.5 |
+| shipping_available | 0.264 | +0.000 | 47.1 |
+| the 4 mention flags | 0.263 | +0.000 | 47.0 |
+| nothing (all features) | 0.263 | +0.000 | 47.3 |
+| release_year | 0.262 | -0.001 | 47.5 |
+| region | 0.261 | -0.002 | 46.7 |

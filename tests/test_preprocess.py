@@ -4,6 +4,7 @@ import pandas as pd
 
 from priced_right.preprocess import (
     clean,
+    mention_flags,
     model_from_description,
     model_info,
     parse_battery_pct,
@@ -153,3 +154,33 @@ def test_clean_drops_parts_and_bundles_and_resolves_se():
     removed = {step["step"]: step["removed"] for step in log}
     assert removed["spare parts (camera, screen, …) at any price"] == 1
     assert removed["bundles (several models, or an iPhone with other devices)"] == 3
+
+
+@pytest.mark.parametrize("text, flag, expected", [
+    # damage: negations in Finnish and English
+    ("Näytössä pieni halkeama", "mentions_damage", True),
+    ("Rikkinäinen iphone 12", "mentions_damage", True),
+    ("Ei halkeamia eikä naarmuja", "mentions_damage", False),
+    ("Näytössä ei ole yhtään säröjä", "mentions_damage", False),
+    ("Halkeamia ei ole, akku hyvä", "mentions_damage", False),
+    ("ilman naarmuja tai halkeamia", "mentions_damage", False),
+    ("No cracks, works fine", "mentions_damage", False),
+    ("Vauriot on korjattu. Näytössä halkeama", "mentions_damage", True),  # new clause after the period
+    ("Takalasi halkeama, ei vaikuta käyttöön", "mentions_damage", True),  # "ei" after, but not "ei ole"
+    ("Näytön lasi: ei säröjä, lohkeamia, halkeamia tai naarmuja", "mentions_damage", False),  # one "ei" negates a list
+    ("Ei vaihtoja, halkeama näytössä", "mentions_damage", True),  # "ei" belongs to another phrase
+    ("Takakansi säröillä, kameran linssissä ei säröjä", "mentions_damage", True),  # a real chip plus a denied one
+    # warranty: negated or ended
+    ("Takuuta jäljellä 2027 asti", "mentions_warranty", True),
+    ("Ei takuuta", "mentions_warranty", False),
+    ("Takuu päättyi 2025", "mentions_warranty", False),
+    ("takuu on umpeutunut", "mentions_warranty", False),
+    # receipt and box: negated or gone
+    ("Kuitti mukana", "mentions_receipt", True),
+    ("Kuitti hukassa", "mentions_receipt", False),
+    ("Alkuperäinen laatikko mukana", "mentions_box", True),
+    ("Myydään ilman laatikkoa", "mentions_box", False),
+    ("Myyntipakkaus puuttuu", "mentions_box", False),
+])
+def test_mention_flags_ignore_negations(text, flag, expected):
+    assert mention_flags(text)[flag] is expected

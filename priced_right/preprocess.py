@@ -103,13 +103,22 @@ _PRICE_RE = re.compile(
     r"|\b(?:hinta|hintapyyntö|hp|price)\w*\s*:?\s*\d{1,4}(?:[ .]\d{3})?\b",
     re.I,
 )
+# Mention flags: (keyword pattern, words right after it that cancel it). A keyword also doesn't count
+# when a negator comes shortly before it in the same clause ("ei halkeamia" = no cracks), see mentions().
+_GONE_RE = re.compile(r"puuttu|hukassa|hukattu|kadon|heitetty|missing|lost", re.I)
 _FLAGS = {
-    "mentions_warranty": re.compile(r"takuu|warranty", re.I),
-    "mentions_receipt": re.compile(r"kuitti|receipt", re.I),
-    "mentions_box": re.compile(r"pakkaus|laatikko|\bbox\b", re.I),
+    "mentions_warranty": (re.compile(r"takuu|warranty", re.I),
+                          re.compile(r"loppu|umpeutu|päätty|mennyt|vanhentu|expired|ended", re.I)),
+    "mentions_receipt": (re.compile(r"kuitti|receipt", re.I), _GONE_RE),
+    "mentions_box": (re.compile(r"pakkaus|laatikko|\bbox\b", re.I), _GONE_RE),
     # "vaurioton" (undamaged) and "halkeamaton" (crack-free) must not count as damage
-    "mentions_damage": re.compile(r"rikki|halkea(?!maton)|haljen|särö|vaurio(?!ton)|broken|crack", re.I),
+    "mentions_damage": (re.compile(r"rikki|halkea(?!maton)|haljen|särö|lohkea(?!maton)|vaurio(?!ton)|broken|crack", re.I), None),
 }
+_NEGATORS = {"ei", "eikä", "ilman", "no", "not", "without", "never"}
+_NEGATED_EXISTENCE = {"ole", "ollut", "löydy", "ilmene"}  # "halkeamia ei ole" = there are no cracks
+_SENTENCE_END_RE = re.compile(r"[.;:!?\n]")
+_CONNECTORS = {"ja", "tai", "eikä", "and", "or", "nor"}
+_WORD_RE = re.compile(r"\w+")
 
 
 def latest_run(raw_dir: Path = RAW_DIR) -> Path:
@@ -200,6 +209,56 @@ def parse_battery_pct(text: str) -> Optional[int]:
     return None
 
 
+def mentions(text: str, pattern: re.Pattern, gone_after: Optional[re.Pattern] = None) -> bool:
+    """True if the keyword appears at least once without being negated.
+
+    A match doesn't count when, within the same clause:
+    - a negator is among the 4 words before it: "ei halkeamia", "ei ole yhtään säröjä", "ilman laatikkoa"
+    - it is followed by "ei ole" and similar: "halkeamia ei ole" (there are no cracks)
+    - it is followed by a word meaning gone or ended (`gone_after`): "takuu päättyi", "kuitti hukassa"
+    """
+    text = text or ""
+    for match in pattern.finditer(text):
+        start, end = match.start(), match.end()
+        while start > 0 and text[start - 1].isalnum():  # widen to whole words: "halkea" in "halkeamia"
+            start -= 1
+        while end < len(text) and text[end].isalnum():
+            end += 1
+        before = _SENTENCE_END_RE.split(text[max(0, start - 120):start])[-1]
+        after = _SENTENCE_END_RE.split(text[end:end + 60])[0].split(",")[0]
+        words_after = [w.lower() for w in _WORD_RE.findall(after)][:3]
+        if _negated_before(before, pattern):
+            continue
+        if words_after[:1] == ["ei"] and set(words_after[1:2]) & _NEGATED_EXISTENCE:
+            continue
+        if gone_after and any(gone_after.match(w) for w in words_after):
+            continue
+        return True
+    return False
+
+
+def _negated_before(before: str, pattern: re.Pattern) -> bool:
+    """A negator among the 4 words before, or at the start of a list of the same kind of words:
+    "ei säröjä, lohkeamia, halkeamia" negates all three, "ei vaihtoja, halkeama" negates nothing."""
+    segments = before.split(",")
+    if _NEGATORS & {w.lower() for w in _WORD_RE.findall(segments[-1])[-4:]}:
+        return True
+    for segment in reversed(segments[:-1]):
+        words = [w.lower() for w in _WORD_RE.findall(segment) if w.lower() not in _CONNECTORS]
+        if not words:
+            continue
+        if words[0] in _NEGATORS and words[1:] and all(pattern.search(w) for w in words[1:]):
+            return True  # "ei säröjä" opens the list
+        if not all(pattern.search(w) for w in words):
+            return False  # not a list of the same kind of words
+    return False
+
+
+def mention_flags(text: str) -> dict[str, bool]:
+    """All mention flags for one listing's title + description."""
+    return {name: mentions(text, pattern, gone) for name, (pattern, gone) in _FLAGS.items()}
+
+
 def strip_prices(text: str) -> str:
     """Remove prices ("750 €", "250e", "Hinta: 180") so text features can't read the asking price.
 
@@ -263,8 +322,9 @@ def clean(raw: pd.DataFrame) -> tuple[pd.DataFrame, list[dict]]:
 
     df["storage_gb"] = [parse_storage_gb(m, t, d) for m, t, d in zip(df["memory"].fillna(""), df["title"], df["description"], strict=True)]
     df["battery_pct"] = [parse_battery_pct(t + " " + d) for t, d in zip(df["title"], df["description"], strict=True)]
-    for name, pattern in _FLAGS.items():
-        df[name] = (df["title"] + " " + df["description"]).str.contains(pattern)
+    flags = [mention_flags(t + "\n" + d) for t, d in zip(df["title"], df["description"], strict=True)]
+    for name in _FLAGS:
+        df[name] = [f[name] for f in flags]
 
     published = pd.to_datetime(df["published_at"], utc=True)
     collected = pd.to_datetime(df["collected_at"], utc=True)
