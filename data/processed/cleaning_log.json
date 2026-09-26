@@ -32,22 +32,32 @@
       "rows": 2061
     },
     {
+      "step": "spare parts (camera, screen, …) at any price",
+      "removed": 3,
+      "rows": 2058
+    },
+    {
+      "step": "bundles (several models, or an iPhone with other devices)",
+      "removed": 6,
+      "rows": 2052
+    },
+    {
       "step": "no single iPhone model in title or description",
-      "removed": 42,
-      "rows": 2019
+      "removed": 41,
+      "rows": 2011
     },
     {
       "step": "implausibly low price (under 10% of model median, not damaged)",
       "removed": 4,
-      "rows": 2015
+      "rows": 2007
     }
   ],
   "coverage": {
-    "storage_gb": 0.961,
-    "battery_pct": 0.51,
+    "storage_gb": 0.963,
+    "battery_pct": 0.513,
     "condition": 0.966
   },
-  "model_group_filled_from_title": 407,
-  "distinct_models": 48,
+  "model_group_filled_from_title": 408,
+  "distinct_models": 51,
   "relisting_groups_with_copies": 29
 }

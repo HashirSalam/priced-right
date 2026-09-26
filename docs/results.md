@@ -14,17 +14,38 @@ Source run `iphones_2026-09-17T110158Z`, cleaned by `priced_right/preprocess.py`
 | accessories and spare parts (under 40 €) | 78 | 2080 |
 | not an iPhone (iPad, Watch, Samsung, …) | 14 | 2066 |
 | several phones in one ad ("2 kpl") | 5 | 2061 |
-| no single iPhone model in title or description | 42 | 2019 |
-| implausibly low price (under 10% of model median, not damaged) | 4 | 2015 |
+| spare parts (camera, screen, …) at any price | 3 | 2058 |
+| bundles (several models, or an iPhone with other devices) | 6 | 2052 |
+| no single iPhone model in title or description | 41 | 2011 |
+| implausibly low price (under 10% of model median, not damaged) | 4 | 2007 |
 
-48 distinct models. Coverage: storage 96%, battery % 51%, condition 97%.
+51 distinct models. Coverage: storage 96%, battery % 51%, condition 97%.
 
 ## Models
 
-5-fold GroupKFold on 2015 listings (copies of an ad stay in one fold), seed 42. Trained on log1p(price); mean ± std over folds.
+5-fold GroupKFold on 2007 listings (copies of an ad stay in one fold), seed 42. Trained on log1p(price); mean ± std over folds.
 
 | Model | RMSLE | MAE (€) | Median % error |
 |---|---|---|---|
-| Overall median | 0.908 ± 0.051 | 200 ± 10 | 53.6% ± 2.5% |
-| Median by model + storage | 0.378 ± 0.037 | 58 ± 1 | 16.9% ± 1.9% |
-| Ridge (text + fields) | 0.280 ± 0.024 | 49 ± 2 | 13.3% ± 0.7% |
+| Overall median | 0.910 ± 0.015 | 199 ± 9 | 54.0% ± 3.5% |
+| Median by model + storage | 0.367 ± 0.009 | 56 ± 4 | 16.4% ± 0.9% |
+| Ridge (text + fields) | 0.262 ± 0.006 | 48 ± 1 | 13.2% ± 0.3% |
+
+## Which features earn their place
+
+Ridge re-scored with one feature group left out (same folds). A positive change means the model is worse without that group, so the group helps; around ±0.002 is noise.
+
+| Left out | RMSLE | Change | MAE (€) |
+|---|---|---|---|
+| exact_model | 0.281 | +0.019 | 50.9 |
+| condition | 0.281 | +0.018 | 50.3 |
+| text (title + description) | 0.276 | +0.014 | 49.7 |
+| model_group | 0.272 | +0.009 | 50.4 |
+| listing_age_days | 0.265 | +0.003 | 48.9 |
+| storage_gb | 0.264 | +0.002 | 47.9 |
+| seller_type | 0.263 | +0.001 | 47.2 |
+| battery_pct | 0.263 | +0.001 | 47.7 |
+| shipping_available | 0.262 | +0.000 | 47.3 |
+| the 4 mention flags | 0.262 | +0.000 | 47.2 |
+| nothing (all features) | 0.262 | +0.000 | 47.5 |
+| region | 0.260 | -0.002 | 46.9 |

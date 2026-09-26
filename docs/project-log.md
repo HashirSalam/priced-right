@@ -58,6 +58,29 @@ What was done, what was decided and why, in date order. Add a dated entry when w
 - GitHub Actions runs lint and tests on every PR and on `main` (about 75 s).
 - A ruleset on `main` requires a pull request (self-merge allowed), squash merging, the **lint and tests** check, an up-to-date branch, and all review conversations resolved. It also blocks force pushes and deletion, and requests Copilot review automatically. Repository admins can bypass it.
 
+## 24 Sep: exploratory data analysis
+
+- The team's first exploration (`data/processed/Untitled.ipynb`) was folded into the EDA notebook below and then removed; it stays in git history (commit 4274f3b).
+- Wrote [notebooks/1.0-eda.ipynb](../notebooks/1.0-eda.ipynb): 10 documented sections, each saying what we look at and why, followed by the result and a takeaway. It compares groups with a **relative price**: price ÷ the median of the same model and storage (after a Codex review pointed out that storage mixes differ between groups), so the phone itself doesn't hide other effects.
+- Findings:
+  - price is right-skewed, which supports log price
+  - model/release year and storage dominate (Spearman 0.89 and 0.71)
+  - retailers ask ~25% more than private sellers for the same model and storage
+  - *fair* −30% and *needs repair* −60%, while the top three condition labels are used loosely
+  - battery below 80% −13%; damage mentions −22% (after the negation fix below), warranty mentions +10%
+  - old models vary far more in price than new ones
+  - Pohjanmaa's high prices come from its 79% retailer share, not the region
+- **Cleaning fixes** from what the EDA found (same PR):
+  - storage right after "iPhone" ("iPhone 16 GB") is no longer read as a model
+  - spare parts are dropped at any price (3), e.g. a rear camera (*takakamera*) or screens (*näyttöjä*)
+  - bundles are dropped (6): several models in one title ("iPhone 12/ 12 pro max") or an iPhone with an Apple Watch, iPad or Android phones
+  - iPhone SE is split by generation when the ad says: 1st 33 €, 2nd 80 €, 3rd 175 € median. Checking this found and fixed 3 bugs: Tori's "(2-3 gen)" label read as 3rd gen, "SE 2nd" without "gen", and "SE20".
+- **Negation-aware mention flags:** a keyword doesn't count when negated ("ei halkeamia" = no cracks, "halkeamia ei ole", "ei säröjä, lohkeamia, halkeamia") or followed by "ended/lost" ("takuu päättyi", "kuitti hukassa"). 31% of the damage flags had been denials. Damage flags dropped from 298 to 197, and the damage effect went from −14% to −22%.
+- **Feature check** (`models.py` → [results](results.md#which-features-earn-their-place)): Ridge re-scored with one feature group left out. Model (+0.019 RMSLE when removed), condition (+0.018) and text (+0.014) matter most, then model group (+0.009; it carries the age signal once release year is dropped). Seller type, battery, the flags and shipping add ~nothing to Ridge because the text covers them; region is within noise. The flags still matter for Random Forest, which uses them instead of full text.
+- Result: 2,007 listings, 51 models. Ridge RMSLE 0.262, 48 € MAE (after dropping release year), 13% median error; median by model + storage 0.367, 56 €, 16%. Tests: 93.
+
+- **Release year dropped from Ridge:** it follows from `exact_model`; no loss without it (RMSLE 0.262 vs 0.263). Kept in the cleaned data and documented in the EDA notebook's summary.
+
 ## Decisions
 
 | Decision | Why | When |
@@ -69,6 +92,7 @@ What was done, what was decided and why, in date order. Add a dated entry when w
 | Log price, RMSLE, GroupKFold | Standard for price prediction; stops copies of an ad from leaking between folds | 17 Sep |
 | Flask for the app | Committed in the canvas; simple server-rendered forms | 23 Sep |
 | All changes through PRs | Review, tests and history for every change | 23 Sep |
+| Release year not a Ridge input | Redundant with `exact_model`; no loss in the feature check | 24 Sep |
 
 ## Open
 
