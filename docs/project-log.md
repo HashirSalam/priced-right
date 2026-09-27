@@ -83,7 +83,7 @@ What was done, what was decided and why, in date order. Add a dated entry when w
 
 ## 27 Sep: back to the first-look stage
 
-At Abtaal's request, the project steps back to what the team did together in the first-look session, keeping the cleaning fixes:
+The project steps back to what the team did together in the first-look session, keeping the cleaning fixes:
 - **Kept:** collector and data, `preprocess.py` with all fixes and their tests, cleaned data, docs, and the decision that `release_year` is not a model input.
 - **Reworked:** [notebooks/1.0-eda.ipynb](../notebooks/1.0-eda.ipynb) now follows the team's first-look steps (columns, summary statistics, models, feature shortlist, seller types, correlation heatmap, selected columns), each explained.
 - **Removed:** `evaluate.py`, `models.py`, `tests/test_models.py` and `docs/results.md` (baseline, Ridge, feature check), plus the EDA sections beyond the first look. The team will do the modelling. Everything removed stays in git history (last on `main` at `2fb7634`).
