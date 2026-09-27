@@ -67,3 +67,10 @@ def test_old_phones_get_wider_ranges():
 def test_invalid_input_is_rejected(kwargs, message):
     with pytest.raises(ValueError, match=message):
         final_model.predict(**kwargs)
+
+
+def test_every_storage_size_in_the_data_can_be_priced():
+    sizes = load_clean()["storage_gb"].dropna().astype(int).unique()
+    assert set(sizes) <= set(final_model.options()["storage_gb"])
+    result = final_model.predict("iPhone 17 Pro Max", 2048, "Kuin uusi")  # a 2 TB phone is in the data
+    assert result["low"] < result["price"] < result["high"]

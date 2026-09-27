@@ -33,7 +33,8 @@ FINAL_MODEL_PATH = MODELS_DIR / "final_model.joblib"
 CONDITION_ENGLISH = {"Vaatii korjausta": "needs repair", "Kohtalainen": "fair", "Hyvä": "good",
                      "Kuin uusi": "like new", "Uusi": "new"}
 SELLER_TYPES = ["private", "retailer"]
-STORAGE_SIZES_GB = [16, 32, 64, 128, 256, 512, 1024]
+# Every size preprocessing accepts (preprocess._STORAGE_GB), so any phone in the training data can be priced
+STORAGE_SIZES_GB = [8, 16, 32, 64, 128, 256, 512, 1024, 2048]
 DISCLAIMER = ("Estimates are based on asking prices of similar iPhone listings on Tori.fi, "
               "not on what phones actually sold for.")
 
