@@ -30,6 +30,7 @@ Source run `iphones_2026-09-17T110158Z`, cleaned by `priced_right/preprocess.py`
 | Overall median | 0.910 ± 0.015 | 199 ± 9 | 54.0% ± 3.5% |
 | Median by model + storage | 0.367 ± 0.009 | 56 ± 4 | 16.4% ± 0.9% |
 | Ridge (text + fields) | 0.262 ± 0.006 | 48 ± 1 | 13.2% ± 0.3% |
+| Random forest (fields) | 0.298 ± 0.013 | 47 ± 4 | 13.0% ± 1.1% |
 
 ## Which features earn their place
 

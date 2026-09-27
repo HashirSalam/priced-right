@@ -69,7 +69,7 @@ flowchart LR
   - [x] EDA: [notebooks/1.0-eda.ipynb](notebooks/1.0-eda.ipynb) (24 Sep). Main findings: model and storage drive price; retailers ask ~25% more for the same model and storage; condition matters mainly for *fair* (−30%) and *needs repair* (−60%); damage mentions −22%, battery below 80% −13%.
   - [x] Fixed the 4 cleaning issues the EDA found: storage read as a model, spare parts at any price, bundles, iPhone SE generations (24 Sep)
   - [x] Mention flags ignore negations ("ei halkeamia" = no cracks); feature check in [results](docs/results.md#which-features-earn-their-place) (24 Sep)
-  - [ ] Random Forest
+  - [x] Random Forest (27 Sep): fields-only RMSLE 0.298 vs Ridge 0.262; Ridge should be selected for the final model
 - [ ] **3. Search re-run (Fri 25, optional):** `collect_iphones --max-items 0` (~42 requests) to see which listings disappeared since 17 Sep
 - [ ] **4. Final model and app (Sat 26):** best model with MAPIE price ranges (stated coverage, e.g. 80%); fairness check of error and coverage by region and seller type; Flask app with seller and buyer modes
 - [ ] **5. Report and slides (Sun 27):** methods, results, limitations ("asking prices, not sale prices")
