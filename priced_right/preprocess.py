@@ -121,6 +121,11 @@ _CONNECTORS = {"ja", "tai", "eikä", "and", "or", "nor"}
 _WORD_RE = re.compile(r"\w+")
 
 
+def load_clean() -> pd.DataFrame:
+    """The cleaned listings written by this module (run it first)."""
+    return pd.read_csv(PROCESSED_DIR / "iphones_clean.csv", dtype={"listing_id": str})
+
+
 def latest_run(raw_dir: Path = RAW_DIR) -> Path:
     runs = sorted(raw_dir.glob("iphones_*"))
     if not runs:
