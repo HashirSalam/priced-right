@@ -22,7 +22,7 @@ from priced_right.final_model import options
 options()
 # {
 #   "exact_model": ["iPhone 3", "iPhone 4", ..., "iPhone 17 Pro Max", "iPhone Air", "iPhone 17e"],   # oldest first
-#   "storage_gb": [16, 32, 64, 128, 256, 512, 1024],
+#   "storage_gb": [8, 16, 32, 64, 128, 256, 512, 1024, 2048],
 #   "condition": {"Vaatii korjausta": "needs repair", "Kohtalainen": "fair", "Hyvä": "good",
 #                 "Kuin uusi": "like new", "Uusi": "new"},
 #   "seller_type": ["private", "retailer"],
