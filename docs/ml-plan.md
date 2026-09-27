@@ -76,6 +76,17 @@ Which allowed inputs the models actually use is decided by the feature check (st
 | Listing age as an input | Not an input | Not available for a new ad (section 4) |
 | Median baseline, Ridge, Random Forest | Median baseline, linear regression, decision tree, random forest, SVR, gradient boosting | Wider comparison of model families, all tuned the same way |
 
+## 6. Model selection rules
+
+Fixed before the feature check and tuning were run (steps 22–24). All scores are mean RMSLE over the same 5 grouped folds of the training set.
+
+1. **Representation is chosen per model.** Two inputs have alternative encodings that carry the same information: the phone model (`exact_model`, or `release_year` + `tier`) and condition (`condition_rank`, or `condition_level`). Each model uses the combination with its lowest RMSLE, with all other candidate inputs included. This is the same principle as scaling only where a model needs it.
+2. **Which inputs are used is shared.** Each input group is removed one at a time, for every model. A group is **kept if removing it makes RMSLE worse by more than 0.002 for at least one model**; otherwise it is dropped for all models. The phone model and condition are tested like every other group. A final check compares the kept set with all inputs, to confirm the dropped groups don't matter jointly.
+3. **Every model is tuned** with a grid search on the same folds. A best setting on the edge of its grid means the grid is widened and the search re-run.
+4. **The final model** is chosen with the **one-standard-error rule**: among the models whose RMSLE is within one standard error (fold standard deviation / √5) of the best model's, pick the easiest to explain, in this order: linear regression, decision tree, random forest, gradient boosting, SVR.
+
 ## Change log
 
 - 27 Sep: plan written.
+- 27 Sep: section 6 (model selection rules) added, before the feature check and tuning were run.
+- 27 Sep: rule 3 applied during tuning. SVR's grid was widened once; gradient boosting's three times, because its best settings kept moving to smaller trees and more, slower rounds, until the grid reached 2-leaf trees (the smallest possible) and every best setting was inside its grid. Each widening improved its RMSLE by only 0.001–0.003 (0.287 → 0.284), within one standard error, but gradient boosting received more tuning than the other models. The final choice (rule 4) was gradient boosting; random forest (0.293) and SVR (0.292) were just outside one standard error of it (≤ 0.290). Report this as a limitation.
