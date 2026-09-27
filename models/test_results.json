@@ -1,0 +1,202 @@
+{
+  "model": "Gradient boosting",
+  "n_train": 1602,
+  "n_test": 405,
+  "model_scores": {
+    "rmsle": 0.2721244525230181,
+    "mae_eur": 46.43529872805549,
+    "median_ape": 0.14317301281576883
+  },
+  "baseline_scores": {
+    "rmsle": 0.37409462583171577,
+    "mae_eur": 57.5029329114515,
+    "median_ape": 0.1645814765285309
+  },
+  "improvement": 0.2725785570482062,
+  "ci": {
+    "rmsle": [
+      0.24245672800129386,
+      0.3018907457718814
+    ],
+    "mae_eur": [
+      41.62853425844637,
+      51.5254204224292
+    ],
+    "median_ape": [
+      0.1281985326785311,
+      0.156429968734541
+    ],
+    "baseline_rmsle": [
+      0.33102726389504955,
+      0.4180642085357779
+    ],
+    "baseline_mae_eur": [
+      51.44079419398694,
+      63.83752976824017
+    ],
+    "improvement": [
+      0.1949143563494281,
+      0.3461667233421929
+    ]
+  },
+  "coverage": 0.7703703703703704,
+  "range_factors": {
+    "2016 or earlier": 1.8589116101854777,
+    "2017-19": 1.4196453558080577,
+    "2020-22": 1.3466901738922914,
+    "2023 or later": 1.1892641760623208
+  },
+  "checks": {
+    "RMSLE at least 10% below the baseline": true,
+    "MAE below the baseline": true,
+    "80% ranges cover 75%-85% overall": true,
+    "80% ranges cover 75%-85% for private sellers": true,
+    "80% ranges cover 75%-85% for retailer sellers": true
+  },
+  "groups": {
+    "seller_type": [
+      {
+        "seller_type": "private",
+        "listings": 308,
+        "rmsle": 0.2839797994,
+        "bias": 0.0145242348,
+        "median_ape": 0.1464773748,
+        "coverage": 0.775974026
+      },
+      {
+        "seller_type": "retailer",
+        "listings": 97,
+        "rmsle": 0.2304731017,
+        "bias": -0.0170337032,
+        "median_ape": 0.139863207,
+        "coverage": 0.7525773196
+      }
+    ],
+    "region_grouped": [
+      {
+        "region_grouped": "Pirkanmaa",
+        "listings": 33,
+        "rmsle": 0.2310875822,
+        "bias": 0.0273434599,
+        "median_ape": 0.1121871859,
+        "coverage": 0.8787878788
+      },
+      {
+        "region_grouped": "Pohjanmaa",
+        "listings": 24,
+        "rmsle": 0.2479859707,
+        "bias": -0.1411586011,
+        "median_ape": 0.1527999649,
+        "coverage": 0.8333333333
+      },
+      {
+        "region_grouped": "Pohjois-Pohjanmaa",
+        "listings": 21,
+        "rmsle": 0.2241483049,
+        "bias": -0.0572202406,
+        "median_ape": 0.2164762389,
+        "coverage": 0.7619047619
+      },
+      {
+        "region_grouped": "Uusimaa",
+        "listings": 189,
+        "rmsle": 0.2341275812,
+        "bias": 0.022390491,
+        "median_ape": 0.1456464778,
+        "coverage": 0.7883597884
+      },
+      {
+        "region_grouped": "Varsinais-Suomi",
+        "listings": 35,
+        "rmsle": 0.3505065377,
+        "bias": -0.0877812069,
+        "median_ape": 0.194476989,
+        "coverage": 0.6285714286
+      },
+      {
+        "region_grouped": "other (fewer than 20)",
+        "listings": 103,
+        "rmsle": 0.3273545829,
+        "bias": 0.0200197381,
+        "median_ape": 0.1281985327,
+        "coverage": 0.7378640777
+      }
+    ],
+    "launch_period": [
+      {
+        "launch_period": "2016 or earlier",
+        "listings": 25,
+        "rmsle": 0.5285823241,
+        "bias": 0.0154621241,
+        "median_ape": 0.2681928706,
+        "coverage": 0.8
+      },
+      {
+        "launch_period": "2017-19",
+        "listings": 71,
+        "rmsle": 0.3297797318,
+        "bias": 0.1140675466,
+        "median_ape": 0.2301930313,
+        "coverage": 0.6901408451
+      },
+      {
+        "launch_period": "2020-22",
+        "listings": 204,
+        "rmsle": 0.2519768903,
+        "bias": 0.0029036096,
+        "median_ape": 0.1452089591,
+        "coverage": 0.7696078431
+      },
+      {
+        "launch_period": "2023 or later",
+        "listings": 105,
+        "rmsle": 0.1490267498,
+        "bias": -0.0053862839,
+        "median_ape": 0.0672271878,
+        "coverage": 0.819047619
+      }
+    ],
+    "price_band": [
+      {
+        "price_band": "(5.0, 100.0]",
+        "listings": 82,
+        "rmsle": 0.4242115936,
+        "bias": 0.276062704,
+        "median_ape": 0.2989147251,
+        "coverage": 0.6463414634
+      },
+      {
+        "price_band": "(100.0, 190.0]",
+        "listings": 82,
+        "rmsle": 0.2804716146,
+        "bias": 0.0372529414,
+        "median_ape": 0.177434222,
+        "coverage": 0.743902439
+      },
+      {
+        "price_band": "(190.0, 314.0]",
+        "listings": 79,
+        "rmsle": 0.2350392548,
+        "bias": -0.0877812069,
+        "median_ape": 0.1349304785,
+        "coverage": 0.8101265823
+      },
+      {
+        "price_band": "(314.0, 500.0]",
+        "listings": 85,
+        "rmsle": 0.1809208919,
+        "bias": -0.0297190187,
+        "median_ape": 0.1121871859,
+        "coverage": 0.8352941176
+      },
+      {
+        "price_band": "(500.0, 1499.0]",
+        "listings": 77,
+        "rmsle": 0.1458356041,
+        "bias": -0.0449445729,
+        "median_ape": 0.0672271878,
+        "coverage": 0.8181818182
+      }
+    ]
+  }
+}
