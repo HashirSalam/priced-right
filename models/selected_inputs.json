@@ -1,0 +1,78 @@
+{
+  "models": {
+    "Linear regression": {
+      "phone": "model name",
+      "condition": "levels",
+      "columns": [
+        "exact_model",
+        "condition_level",
+        "storage_log2",
+        "seller_type",
+        "mentions_damage"
+      ]
+    },
+    "Decision tree": {
+      "phone": "year + tier",
+      "condition": "rank",
+      "columns": [
+        "release_year",
+        "tier",
+        "condition_rank",
+        "storage_log2",
+        "seller_type",
+        "mentions_damage"
+      ]
+    },
+    "Random forest": {
+      "phone": "year + tier",
+      "condition": "rank",
+      "columns": [
+        "release_year",
+        "tier",
+        "condition_rank",
+        "storage_log2",
+        "seller_type",
+        "mentions_damage"
+      ]
+    },
+    "SVR": {
+      "phone": "year + tier",
+      "condition": "levels",
+      "columns": [
+        "release_year",
+        "tier",
+        "condition_level",
+        "storage_log2",
+        "seller_type",
+        "mentions_damage"
+      ]
+    },
+    "Gradient boosting": {
+      "phone": "year + tier",
+      "condition": "levels",
+      "columns": [
+        "release_year",
+        "tier",
+        "condition_level",
+        "storage_log2",
+        "seller_type",
+        "mentions_damage"
+      ]
+    }
+  },
+  "kept_groups": [
+    "storage",
+    "seller type",
+    "damage mentioned"
+  ],
+  "dropped_groups": [
+    "battery",
+    "region",
+    "warranty mentioned",
+    "box mentioned",
+    "receipt mentioned",
+    "shipping offered"
+  ],
+  "phone_model_kept": true,
+  "condition_kept": true
+}
