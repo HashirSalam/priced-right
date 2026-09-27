@@ -57,7 +57,7 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 - Retailers are 20% of listings (Elisa, Multitronic, …), with a median of 340 € vs. 200 € for private sellers. The first 129-listing sample overstated them at 40%.
 - 154 descriptions (7%) contained contact details, now scrubbed. See [Privacy validation](#privacy-validation).
 - Sellers leave fields empty: model group 22%, memory 12%, condition 4%.
-- 3 listings have a Galaxy model group: 1 is a real Samsung phone (drop it); 2 are iPhones (XR, 4) that a seller mis-tagged (relabel them from the title).
+- 3 listings have a Galaxy model group: 1 is a real Samsung phone and 2 are iPhones (XR, 4) that a seller mis-tagged. `preprocess.py` drops the Samsung and relabels the iPhones from their titles.
 - 8 listings were removed (HTTP 404) and 9 went inactive between the search pass and the listing pass.
 
 ### Privacy validation

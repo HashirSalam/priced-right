@@ -265,7 +265,9 @@ def mention_flags(text: str) -> dict[str, bool]:
 
 
 def strip_prices(text: str) -> str:
-    """Remove prices ("750 €", "250e", "Hinta: 180") so text features can't read the asking price.
+    """Remove prices ("750 €", "250e", "Hinta: 180") so text models can't read the asking price.
+
+    Not used in cleaning; apply it to title/description before building text features.
 
     "16e" right after "iPhone" is a model name (iPhone 16e), not a price, and is kept.
     """
