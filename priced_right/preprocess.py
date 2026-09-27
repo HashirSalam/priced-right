@@ -121,6 +121,11 @@ _CONNECTORS = {"ja", "tai", "eikä", "and", "or", "nor"}
 _WORD_RE = re.compile(r"\w+")
 
 
+def load_clean() -> pd.DataFrame:
+    """The cleaned listings written by this module (run it first)."""
+    return pd.read_csv(PROCESSED_DIR / "iphones_clean.csv", dtype={"listing_id": str})
+
+
 def latest_run(raw_dir: Path = RAW_DIR) -> Path:
     runs = sorted(raw_dir.glob("iphones_*"))
     if not runs:
@@ -260,7 +265,9 @@ def mention_flags(text: str) -> dict[str, bool]:
 
 
 def strip_prices(text: str) -> str:
-    """Remove prices ("750 €", "250e", "Hinta: 180") so text features can't read the asking price.
+    """Remove prices ("750 €", "250e", "Hinta: 180") so text models can't read the asking price.
+
+    Not used in cleaning; apply it to title/description before building text features.
 
     "16e" right after "iPhone" is a model name (iPhone 16e), not a price, and is kept.
     """

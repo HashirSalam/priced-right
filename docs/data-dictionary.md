@@ -15,7 +15,7 @@ Coverage figures come from the full collection run on 2026-09-17: 2,178 listings
 | Field | Type | Source | Coverage | Used for (canvas) |
 |---|---|---|---|---|
 | `title` | text | search results | 100% | TF-IDF; parse the exact model ("15 Pro Max"), release year, storage, colour, battery %; flag accessories and spare parts. Contact details scrubbed like descriptions. |
-| `description` | text | listing page | 100% | TF-IDF, description length, keyword flags (battery health, warranty *takuu*, receipt *kuitti*, box *pakkaus/laatikko*, damage *rikki/halkeama/naarmu*). Contact details are replaced with `[url]` (personal pages, social profiles), `[email]`, `[phone]` or `[number]` at collection time (154 descriptions, 7%). Median length 268 characters. Prices written in the text ("750 €", "250e", "Hinta: 180") are removed before TF-IDF, since 10% of ads repeat their own asking price. |
+| `description` | text | listing page | 100% | TF-IDF, description length, keyword flags (battery health, warranty *takuu*, receipt *kuitti*, box *pakkaus/laatikko*, damage *rikki/halkeama/särö*). Contact details are replaced with `[url]` (personal pages, social profiles), `[email]`, `[phone]` or `[number]` at collection time (154 descriptions, 7%). Median length 268 characters. Prices written in the text ("750 €", "250e", "Hinta: 180"): remove them with `preprocess.strip_prices()` before any text model, since 10% of ads repeat their own asking price. |
 | `condition` | category | listing page | 96% | 5 levels: Uusi, Kuin uusi, Hyvä, Kohtalainen, Vaatii korjausta. Keep missing as its own category. |
 | `model_group` | category | listing page | 78% | Tori's 8 coarse buckets, e.g. `iPhone 15/Plus/Pro/Max`. 22% of sellers leave it empty, so parse the exact model from the title. 3 listings have a Galaxy group: drop the 1 real Samsung phone and relabel the 2 mis-tagged iPhones from their titles. |
 | `memory` | category | search results | 88% | 16 GB – 1 TB, plus `Muu` (other); missing stays its own category |
@@ -33,7 +33,7 @@ Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv`
 |---|---|---|---|
 | `exact_model` | `title`, else `description` if it names exactly one model | 100% | e.g. "iPhone 15 Pro Max"; handles "12Pro", "13mini", "Phone 12", "Apple 15 pro max", "iPhone Air"; variants Apple never sold ("XR Max") drop to the base model; "iPhone 16 GB" is storage, not a model. iPhone SE is split into 1st/2nd/3rd gen when the ad says ("SE 2", "3rd gen", "2022", "5G"; not Tori's "(2-3 gen)" label), otherwise plain "iPhone SE". Descriptions naming several models are not used. 51 models. |
 | `model_group` | `exact_model` | 100% | Tori's bucket, recomputed from the model: fills the 22% left empty and fixes 2 mis-tagged iPhones. `model_group_filled` marks the 407 changed rows. |
-| `release_year` | `exact_model` | 100% | Launch year, e.g. 6s → 2015, 16e → 2025; SE 1st/2nd/3rd gen → 2016/2020/2022, SE of unknown generation → 2020. Not a Ridge input: it follows from `exact_model` (dropped 24 Sep). |
+| `release_year` | `exact_model` | 100% | Launch year, e.g. 6s → 2015, 16e → 2025; SE 1st/2nd/3rd gen → 2016/2020/2022, SE of unknown generation → 2020. Not a model input: it follows from `exact_model` (decided 24 Sep). |
 | `storage_gb` | `memory`, then title, then description | 96% | 8 GB – 2 TB; "Gt"/"Tt" are Finnish for GB/TB |
 | `battery_pct` | `title` + `description` | 51% | "Akun kunto 89%", "Battery health: 100%"; values 50–100 only |
 | `mentions_warranty`, `mentions_receipt`, `mentions_box` | `title` + `description` | 20%, 4%, 12% | *takuu*, *kuitti*, *pakkaus/laatikko*. Negated or ended mentions don't count: "ei takuuta" (no warranty), "takuu päättyi" (warranty ended), "kuitti hukassa" (receipt lost), "ilman laatikkoa" (without box). |
@@ -41,7 +41,7 @@ Computed by `priced_right/preprocess.py` into `data/processed/iphones_clean.csv`
 | `listing_age_days` | `published_at`, `collected_at` | 100% | Median 14 days; Tori resets `published_at` when a listing is renewed |
 | `relisting_group` | normalized `title` + first 120 characters of `description` | 100% | Same ad posted again, or a shop's template; GroupKFold keeps a group in one fold |
 
-Rows removed during cleaning (0 € and placeholder prices, accessories and spare parts, non-iPhones, multi-phone lots and bundles, no single model, implausibly low prices) are counted in [results.md](results.md).
+Rows removed during cleaning (0 € and placeholder prices, accessories and spare parts, non-iPhones, multi-phone lots and bundles, no single model, implausibly low prices) are counted in `data/processed/cleaning_log.json`.
 
 ## Keys and metadata
 

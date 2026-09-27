@@ -37,7 +37,7 @@ What was done, what was decided and why, in date order. Add a dated entry when w
 - Made the README diagrams readable on GitHub (`6fd6cb6`, `833e61d`).
 
 **Step 1: preprocessing and baselines** (PR #1, `29662cf`)
-- `preprocess.py`: 2,178 → **2,015 listings** after removing 0 € and placeholder prices, accessories and spare parts, non-iPhones, multi-phone lots, ads with no single model, and implausibly low prices ([funnel](results.md)).
+- `preprocess.py`: 2,178 → **2,015 listings** after removing 0 € and placeholder prices, accessories and spare parts, non-iPhones, multi-phone lots, ads with no single model, and implausibly low prices (funnel (`docs/results.md`, removed 27 Sep, in git history)).
 - Derived features: exact model (48 models; read from the title for 99% of listings), release year, storage (96%), battery % (51%), warranty/receipt/box/damage mentions, listing age, and a relisting group.
 - `evaluate.py`: 5-fold `GroupKFold` on log price, so copies of an ad never end up in both training and test data. Metrics: RMSLE, MAE in €, median % error.
 - `models.py` results:
@@ -76,10 +76,17 @@ What was done, what was decided and why, in date order. Add a dated entry when w
   - bundles are dropped (6): several models in one title ("iPhone 12/ 12 pro max") or an iPhone with an Apple Watch, iPad or Android phones
   - iPhone SE is split by generation when the ad says: 1st 33 €, 2nd 80 €, 3rd 175 € median. Checking this found and fixed 3 bugs: Tori's "(2-3 gen)" label read as 3rd gen, "SE 2nd" without "gen", and "SE20".
 - **Negation-aware mention flags:** a keyword doesn't count when negated ("ei halkeamia" = no cracks, "halkeamia ei ole", "ei säröjä, lohkeamia, halkeamia") or followed by "ended/lost" ("takuu päättyi", "kuitti hukassa"). 31% of the damage flags had been denials. Damage flags dropped from 298 to 197, and the damage effect went from −14% to −22%.
-- **Feature check** (`models.py` → [results](results.md#which-features-earn-their-place)): Ridge re-scored with one feature group left out. Model (+0.019 RMSLE when removed), condition (+0.018) and text (+0.014) matter most, then model group (+0.009; it carries the age signal once release year is dropped). Seller type, battery, the flags and shipping add ~nothing to Ridge because the text covers them; region is within noise. The flags still matter for Random Forest, which uses them instead of full text.
+- **Feature check** (`models.py` → results (`docs/results.md`, removed 27 Sep, in git history)): Ridge re-scored with one feature group left out. Model (+0.019 RMSLE when removed), condition (+0.018) and text (+0.014) matter most, then model group (+0.009; it carries the age signal once release year is dropped). Seller type, battery, the flags and shipping add ~nothing to Ridge because the text covers them; region is within noise. The flags still matter for Random Forest, which uses them instead of full text.
 - Result: 2,007 listings, 51 models. Ridge RMSLE 0.262, 48 € MAE (after dropping release year), 13% median error; median by model + storage 0.367, 56 €, 16%. Tests: 93.
 
 - **Release year dropped from Ridge:** it follows from `exact_model`; no loss without it (RMSLE 0.262 vs 0.263). Kept in the cleaned data and documented in the EDA notebook's summary.
+
+## 27 Sep: back to the first-look stage
+
+The project steps back to what the team did together in the first-look session, keeping the cleaning fixes:
+- **Kept:** collector and data, `preprocess.py` with all fixes and their tests, cleaned data, docs, and the decision that `release_year` is not a model input.
+- **Reworked:** [notebooks/1.0-eda.ipynb](../notebooks/1.0-eda.ipynb) now follows the team's first-look steps (columns, summary statistics, models, feature shortlist, seller types, correlation heatmap, selected columns), each explained.
+- **Removed:** `evaluate.py`, `models.py`, `tests/test_models.py` and `docs/results.md` (baseline, Ridge, feature check), plus the EDA sections beyond the first look. The team will do the modelling. Everything removed stays in git history (last on `main` at `2fb7634`).
 
 ## Decisions
 
@@ -92,7 +99,7 @@ What was done, what was decided and why, in date order. Add a dated entry when w
 | Log price, RMSLE, GroupKFold | Standard for price prediction; stops copies of an ad from leaking between folds | 17 Sep |
 | Flask for the app | Committed in the canvas; simple server-rendered forms | 23 Sep |
 | All changes through PRs | Review, tests and history for every change | 23 Sep |
-| Release year not a Ridge input | Redundant with `exact_model`; no loss in the feature check | 24 Sep |
+| Release year not a model input | Redundant with `exact_model` | 24 Sep |
 
 ## Open
 
