@@ -29,27 +29,32 @@ already gives us.
 
 ## Roadmap
 
-Where we are (updated 27 Sep): data collected and cleaned, first look done. The full history is in [docs/project-log.md](docs/project-log.md).
+Where we are (updated 27 Sep): data collected and cleaned, modelling done, final model handed over to the app. The full history is in [docs/project-log.md](docs/project-log.md).
 
 ```mermaid
 flowchart LR
-    subgraph done["Done"]
+    subgraph data["Data · 17–24 Sep"]
         direction TB
         a["Repo and package<br/>17 Sep"] --> b["Tori crawler<br/>17 Sep"] --> c["Data: 2,178 iPhones<br/>17 Sep"] --> d["Privacy audit and fixes<br/>17 Sep"] --> e["Cleaning + fixes<br/>2,007 listings"] --> f["First look (EDA)<br/>notebook 1.0"]
     end
+    subgraph ml["Modelling · 27 Sep"]
+        direction TB
+        g["ML plan + fixed<br/>20% test set"] --> h["EDA on training set<br/>notebook 2.0"] --> i["Features, pipelines,<br/>feature check, tuning"] --> j["Error analysis<br/>notebook 3.0"] --> k["Test set, once<br/>RMSLE 0.272"] --> l["Final model<br/>for the app"]
+    end
     subgraph next["Next"]
         direction TB
-        g["Modelling<br/>team"] --> h["Final model and app<br/>price ranges, fairness, Flask"] --> i["Report and slides"]
+        m["Flask app"] --> n["Report and slides"]
     end
-    done --> next
+    data --> ml --> next
 
     classDef done fill:#E1F5EE,stroke:#0F6E56,color:#085041
     classDef now fill:#EEEDFE,stroke:#534AB7,color:#3C3489
     classDef upcoming fill:#F1EFE8,stroke:#5F5E5A,color:#444441
-    class a,b,c,d,e,f done
-    class g now
-    class h,i upcoming
-    style done fill:none,stroke:#0F6E56
+    class a,b,c,d,e,f,g,h,i,j,k,l done
+    class m now
+    class n upcoming
+    style data fill:none,stroke:#0F6E56
+    style ml fill:none,stroke:#0F6E56
     style next fill:none,stroke:#534AB7
 ```
 
@@ -61,18 +66,47 @@ flowchart LR
 - [x] Privacy audit: missed contact details found and removed (see [privacy validation](docs/data-collection-notes.md#privacy-validation))
 - [x] **Cleaning** (`preprocess.py`): 2,007 clean listings, 51 models, derived features ([data dictionary](docs/data-dictionary.md)). Fixes: storage read as a model, spare parts, bundles, iPhone SE generations, and mention flags that ignore negations ("ei halkeamia" = no cracks)
 - [x] **First look:** [notebooks/1.0-eda.ipynb](notebooks/1.0-eda.ipynb), the team's first-look steps with explanations. Price goes most with release year and storage; retailers ask more than private sellers
-- [x] `release_year` is not a model input: it follows from `exact_model` (24 Sep)
+- [x] **ML plan** ([docs/ml-plan.md](docs/ml-plan.md)): target, metrics, success bar, allowed inputs and selection rules, all written before modelling (27 Sep)
+- [x] **Test set:** 20% of listings set aside by relisting group and used once, for the final model (`split.py`)
+- [x] **EDA on the training set:** [notebooks/2.0-aa-eda.ipynb](notebooks/2.0-aa-eda.ipynb). Retailers ask ~22% more for the same phone; region is mostly seller mix; box and receipt mentions make no difference
+- [x] **Features and pipelines** (`features.py`, `pipelines.py`): only inputs a user can give before posting an ad; one pipeline per model
+- [x] **Feature check and model choice** ([feature-check.md](docs/feature-check.md), [model-comparison.md](docs/model-comparison.md)): five models tuned on the same grouped folds; kept: phone model, condition, storage, seller type, damage; final model: gradient boosting
+- [x] **Error analysis:** [notebooks/3.0-aa-error-analysis.ipynb](notebooks/3.0-aa-error-analysis.ipynb), before the test set was opened
+- [x] **Test set, once** ([test-results.md](docs/test-results.md)): all success-bar criteria met; 80% price ranges; fairness by seller type and region
+- [x] **Final model for the app:** retrained on all listings, with `predict()` and `options()` ([model-handover.md](docs/model-handover.md), [model-card.md](docs/model-card.md))
 
 ### Next
 
-- [ ] Decide on `region` as a feature (open from the shortlist)
-- [ ] **Modelling** (team): baseline and learned models, evaluated so copies of an ad never end up in both training and test data
-- [ ] **Final model and app:** price ranges, fairness check by region and seller type, Flask app with seller and buyer modes
+- [ ] **Flask app** with seller and buyer modes, built on `priced_right.final_model` ([model-handover.md](docs/model-handover.md))
 - [ ] **Report and slides:** methods, results, limitations ("asking prices, not sale prices")
 
-The median baseline is grouped by model and storage. If a fitted model does not clearly beat
-that lookup table, the finding is about the problem rather than about our modelling, and it
-belongs in the report either way.
+## Results
+
+Final model: **gradient boosting** on launch year, product line, condition, storage, seller type and damage mentions. Scored once on the 405 held-out test listings ([docs/test-results.md](docs/test-results.md)):
+
+| | Final model | Baseline: median of the same model + storage |
+|---|---|---|
+| RMSLE | **0.272** (95% CI 0.242–0.302) | 0.374 |
+| Mean absolute error | **46 €** | 58 € |
+| Median % error | **14.3%** | 16.5% |
+| 80% price ranges | cover **77%** of listings | |
+
+RMSLE is 27% below the baseline's (95% CI 19–35%), meeting every criterion of the success bar set before modelling. Estimates are least reliable for phones under about 100 € and phones launched in 2016 or earlier; see the [model card](docs/model-card.md) for results by group and known limitations.
+
+## Reproducing the modelling
+
+Run from the repo root, in this order. Each step writes what the next one reads.
+
+```bash
+python -m priced_right.preprocess          # clean raw listings -> data/processed/iphones_clean.csv
+python -m priced_right.split               # fixed 20% test set (already created; refuses to redraw)
+python -m priced_right.models check        # feature check on the training set -> docs/feature-check.md
+python -m priced_right.models tune         # tune and compare 5 models -> docs/model-comparison.md
+python -m priced_right.final_evaluation    # the one-time test evaluation (already done; refuses to rerun)
+python -m priced_right.final_model         # retrain on all listings -> models/final_model.joblib
+```
+
+The rules each step follows, and every change to them, are in [docs/ml-plan.md](docs/ml-plan.md).
 
 ## Data source and collection policy
 
@@ -135,24 +169,42 @@ priced-right/
 │   ├── tori.py                      Tori client: requests, robots.txt, parsing, privacy filter
 │   ├── collect_iphones.py           full iPhone collection (search + listing pages)
 │   ├── progress.py                  live progress of a running collection
-│   └── preprocess.py                cleaning and derived features
+│   ├── preprocess.py                cleaning and derived features
+│   ├── split.py                     the fixed 20% test set; load_train() / load_test()
+│   ├── features.py                  target (log price) and model inputs
+│   ├── pipelines.py                 median baseline and one pipeline per model
+│   ├── evaluate.py                  scoring and grouped cross-validation
+│   ├── models.py                    feature check, tuning and model choice
+│   ├── ranges.py                    80% price ranges from held-out errors
+│   ├── final_evaluation.py          the one-time test-set evaluation
+│   └── final_model.py               final model retrained on all data; predict() and options() for the app
 │
 ├── notebooks/
-│   └── 1.0-eda.ipynb                first look at the data (documented, with charts)
+│   ├── 1.0-eda.ipynb                first look at all the data (the team's first-look session)
+│   ├── 2.0-aa-eda.ipynb             EDA on the training set, with modelling decisions
+│   └── 3.0-aa-error-analysis.ipynb  where the final model is wrong, before the test set was opened
 │
-├── tests/                           cleaning and parser tests (uv run pytest)
+├── models/                          model choices, results and the saved final model (committed)
+├── tests/                           tests for every module (uv run pytest)
 ├── .github/workflows/tests.yml      lint + tests on every PR
 │
 ├── docs/
 │   ├── project-canvas.md            the mini project canvas
-│   ├── data-dictionary.md           fields we collect, why, and what we leave out
+│   ├── data-dictionary.md           fields we collect, why, what we leave out, and the model inputs
 │   ├── data-collection-notes.md     crawler rules and how Tori exposes its data
+│   ├── ml-plan.md                   modelling rules, written before modelling, with a change log
+│   ├── feature-check.md             which inputs each model keeps (generated)
+│   ├── model-comparison.md          tuned models vs baseline, and the final choice (generated)
+│   ├── test-results.md              the one-time test-set results (generated)
+│   ├── model-card.md                what the final model is for, how good it is, its limits
+│   ├── model-handover.md            how the app uses the final model
 │   ├── project-log.md               dated history of work and decisions
 │   └── runs/                        generated report for every run (committed)
 │
 └── data/                            collected data (committed)
     ├── raw/tori/iphones_<time>/     records, listings.csv, failures, log
-    └── processed/                   iphones_clean.csv, cleaning_log.json (rebuilt by preprocess.py)
+    └── processed/                   iphones_clean.csv, cleaning_log.json (rebuilt by preprocess.py),
+                                     test_listing_ids.csv (the fixed test set)
 ```
 
 How the pieces fit together:
@@ -165,15 +217,21 @@ flowchart TB
     collect --> reports["docs/runs/ report<br/>committed"]
     raw --> prep["priced_right/preprocess.py"]
     prep --> clean["data/processed/iphones_clean.csv"]
-    clean --> eda["notebooks/1.0-eda.ipynb<br/>first look"]
-    clean -.-> planned["models and Flask app<br/>next"]
+    clean --> split["priced_right/split.py<br/>80% train · 20% test"]
+    split -->|training set| select["features.py · pipelines.py<br/>models.py: feature check, tuning"]
+    select --> final_eval["final_evaluation.py<br/>test set, once"]
+    split -->|test set| final_eval
+    final_eval --> results["docs/test-results.md"]
+    select --> final_model["final_model.py<br/>retrained on all data"]
+    final_model --> saved["models/final_model.joblib"]
+    saved -.-> app["Flask app<br/>next"]
 
     classDef code fill:#EEEDFE,stroke:#534AB7,color:#3C3489
     classDef data fill:#E1F5EE,stroke:#0F6E56,color:#085041
     classDef todo fill:#F1EFE8,stroke:#5F5E5A,color:#444441,stroke-dasharray: 5 5
-    class client,collect,prep code
-    class raw,reports,clean,eda data
-    class planned todo
+    class client,collect,prep,split,select,final_eval,final_model code
+    class raw,reports,clean,results,saved data
+    class app todo
 ```
 
 Add folders only when there is something to put in them. When they are needed, follow the [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org/) conventions:
