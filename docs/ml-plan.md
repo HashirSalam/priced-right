@@ -85,8 +85,28 @@ Fixed before the feature check and tuning were run (steps 22–24). All scores a
 3. **Every model is tuned** with a grid search on the same folds. A best setting on the edge of its grid means the grid is widened and the search re-run.
 4. **The final model** is chosen with the **one-standard-error rule**: among the models whose RMSLE is within one standard error (fold standard deviation / √5) of the best model's, pick the easiest to explain, in this order: linear regression, decision tree, random forest, gradient boosting, SVR.
 
+## 7. Price ranges and the final evaluation
+
+Fixed after the error analysis ([notebooks/3.0-aa-error-analysis.ipynb](../notebooks/3.0-aa-error-analysis.ipynb)) and **before the test set was opened**.
+
+### Price ranges (step 27)
+
+- **Level:** 80% ranges: about 4 in 5 asking prices should fall inside.
+- **Method:** conformal prediction built from held-out errors, **separately for each launch period** (2016 or earlier, 2017–19, 2020–22, 2023–26). For each period, the range half-width on the log scale is the 80% quantile (with the usual finite-sample correction) of the model's out-of-fold absolute errors on the training set. A range is `price ÷ factor` to `price × factor`.
+- **Why per period:** the error analysis showed errors for old phones are about three times those for new ones. Checked on the training set (ranges built from four folds' errors, coverage measured on the fifth): one width for all phones covered 80% overall but only 50% of phones from 2016 or earlier and 95% of phones from 2023 on. Per-period widths covered 80–82% in every period, at almost the same average width (×/÷ 1.36 vs 1.34).
+- MAPIE's cross-conformal regressor has no per-group option, so the method is implemented directly in `priced_right/ranges.py`.
+
+### Test-set evaluation (step 26)
+
+- The final model is trained on the whole training set and scored **once** on the test set; so is the baseline.
+- **Uncertainty:** 95% confidence intervals from 2,000 bootstrap resamples of the test set, drawn by relisting group (seed 42). The improvement over the baseline is bootstrapped on the same resamples.
+- **Success bar** (section 3): RMSLE at least 10% lower than the baseline's; lower MAE; 80% ranges covering 75–85% overall and for each seller type.
+- **Fairness:** RMSLE, bias and range coverage by seller type, region (regions with at least 20 test listings), launch period and price band.
+
 ## Change log
 
 - 27 Sep: plan written.
 - 27 Sep: section 6 (model selection rules) added, before the feature check and tuning were run.
 - 27 Sep: rule 3 applied during tuning. SVR's grid was widened once; gradient boosting's three times, because its best settings kept moving to smaller trees and more, slower rounds, until the grid reached 2-leaf trees (the smallest possible) and every best setting was inside its grid. Each widening improved its RMSLE by only 0.001–0.003 (0.287 → 0.284), within one standard error, but gradient boosting received more tuning than the other models. The final choice (rule 4) was gradient boosting; random forest (0.293) and SVR (0.292) were just outside one standard error of it (≤ 0.290). Report this as a limitation.
+- 27 Sep: error analysis done; no changes to cleaning, features or model. Section 7 (price ranges and final evaluation) added before the test set was opened.
+- 27 Sep: test set evaluated once (docs/test-results.md). All success-bar criteria met: RMSLE 0.272 vs 0.374 for the baseline (27% lower, 95% CI 19–35%), MAE 46 € vs 58 €, 80% ranges covering 77% overall (78% private sellers, 75% retailers). Weak spots, as the error analysis predicted: phones under 100 € (65% coverage, priced 28% too high) and small regions.
