@@ -88,6 +88,43 @@ The project steps back to what the team did together in the first-look session, 
 - **Reworked:** [notebooks/1.0-eda.ipynb](../notebooks/1.0-eda.ipynb) now follows the team's first-look steps (columns, summary statistics, models, feature shortlist, seller types, correlation heatmap, selected columns), each explained.
 - **Removed:** `evaluate.py`, `models.py`, `tests/test_models.py` and `docs/results.md` (baseline, Ridge, feature check), plus the EDA sections beyond the first look. The team will do the modelling. Everything removed stays in git history (last on `main` at `2fb7634`).
 
+## 27 Sep: modelling, from plan to final model
+
+The modelling followed the data science lifecycle step by step, one PR per stage, with every rule written down before the results it applies to.
+
+**ML plan and test set**
+- [ml-plan.md](ml-plan.md): target (asking price), metrics (RMSLE first; MAE and median % error reported), baseline (median of the same model and storage) and a **success bar** set before modelling: test RMSLE at least 10% below the baseline's, lower MAE, 80% price ranges covering 75–85%.
+- **Inputs must be available before an ad is posted**, because the app asks for a phone's details first. That rules out listing age (always 0 for a new ad) and the raw ad text as inputs (the app uses dropdowns); `model_group` and `municipality` are left out as redundant.
+- `split.py`: **405 listings (20%) set aside as the test set**, drawn by relisting group and saved as IDs. Everything until the final evaluation uses the other 1,602.
+
+**EDA on the training set** ([notebooks/2.0-aa-eda.ipynb](../notebooks/2.0-aa-eda.ipynb))
+- Log price confirmed as the target (skewness 1.57 → −0.46).
+- For the same model and storage: retailers ask ~22% more (not the 55% raw medians suggest); *needs repair* −60%, *fair* −28%, *new* no more than *like new*; damage mentions −22%; battery under 80% −14%.
+- Region differences are mostly seller mix; warranty mentions mostly repeat seller type; box and receipt mentions make no difference.
+- Ads that don't mention battery price like typical ones: the missing values come from old, brand-new and broken phones, not hidden bad batteries.
+- No cleaning changes needed.
+
+**Features and pipelines** (`features.py`, `pipelines.py`)
+- Phone model as its name *or* as launch year + product line (never both); storage on a log2 scale; condition as a rank *or* one column per level; battery bands with "not mentioned" as its own band.
+- One pipeline per model (linear regression, decision tree, random forest, SVR, gradient boosting). Filling, scaling and encoding happen inside each pipeline on training folds only.
+
+**Feature check and model choice** ([feature-check.md](feature-check.md), [model-comparison.md](model-comparison.md))
+- Rules added to the ML plan first (section 6). Each input group was removed one at a time for every model, scored with the same 5 grouped folds.
+- **Kept:** phone model, condition, storage, seller type, damage. **Dropped:** battery, region, warranty, box, receipt, shipping (none worsened any model by more than 0.002 RMSLE).
+- Launch year + product line suited the tree models and SVR; linear regression did best with the model name and one column per condition level.
+- All five models tuned. **Final model: gradient boosting**, cross-validated RMSLE 0.284 vs 0.369 for the baseline. Its grid was widened three times under the rules, which is noted as a limitation.
+
+**Error analysis** ([notebooks/3.0-aa-error-analysis.ipynb](../notebooks/3.0-aa-error-analysis.ipynb))
+- On out-of-fold training predictions, before the test set was opened. Weakest on phones under 100 €, phones launched in 2016 or earlier, *needs repair* phones, and ads for parts or collectors. No changes: these are reported as limitations.
+- Price ranges built per launch period, because old phones' errors are about three times those of new phones (ml-plan section 7).
+
+**Test set, once** ([test-results.md](test-results.md))
+- RMSLE **0.272** vs 0.374 for the baseline (27% lower, 95% CI 19–35%); MAE 46 € vs 58 €; 80% ranges cover 77% (private sellers 78%, retailers 75%). **All success-bar criteria met.**
+
+**Final model for the app** ([model-handover.md](model-handover.md), [model-card.md](model-card.md))
+- Retrained on all 2,007 listings and saved as `models/final_model.joblib`. The app uses `options()` for its dropdowns and `predict()` for seller and buyer modes.
+- Tests: 177.
+
 ## Decisions
 
 | Decision | Why | When |
@@ -99,11 +136,17 @@ The project steps back to what the team did together in the first-look session, 
 | Log price, RMSLE, GroupKFold | Standard for price prediction; stops copies of an ad from leaking between folds | 17 Sep |
 | Flask for the app | Committed in the canvas; simple server-rendered forms | 23 Sep |
 | All changes through PRs | Review, tests and history for every change | 23 Sep |
-| Release year not a model input | Redundant with `exact_model` | 24 Sep |
+| ~~Release year not a model input~~ | Superseded 27 Sep: never used together with `exact_model`, but launch year + product line is the better description of the phone for most models | 24 Sep |
+| Rules and success bar written before modelling | So results can't shape the rules they're judged by ([ml-plan.md](ml-plan.md)) | 27 Sep |
+| Fixed 20% test set, used once | An honest final score | 27 Sep |
+| Only inputs available before an ad is posted | The app asks before listing; rules out listing age and free text | 27 Sep |
+| Keep retailer listings, with `seller_type` as an input | Retailers ask ~22% more for the same phone; the model accounts for it | 27 Sep |
+| Region not a model input | Mostly seller mix; no model improved with it. Still used in the fairness check | 27 Sep |
+| Final model: gradient boosting | Best cross-validated RMSLE under the one-standard-error rule | 27 Sep |
+| Price ranges per launch period | Old phones are much harder to price; one width for all under-covered them | 27 Sep |
 
 ## Open
 
-- Keep retailer listings (20%) with `seller_type` as a feature? (recommended)
-- Friday search-only re-run to see which listings disappeared?
+- Friday search-only re-run to see which listings disappeared? Not needed for the model; a new collection would give a fresh test set for a future version.
 - The README collection policy describes collector features not built yet (backoff, contact address, incremental fetching). Waiting for Abtaal.
-- Next: step 2, EDA notebook and Random Forest.
+- Next: Flask app (built on `priced_right.final_model`), then report and slides.
