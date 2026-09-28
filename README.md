@@ -157,6 +157,16 @@ GitHub Actions runs the same two checks on every PR and on `main` ([workflow](.g
 
 After adding or upgrading a dependency in `pyproject.toml`, refresh the lock file with `pip freeze --exclude-editable > requirements-lock.txt` and commit both files.
 
+## Run the app
+
+With the project environment active, run from the repo root:
+
+```bash
+python -m flask --app priced_right.app run
+```
+
+Open http://127.0.0.1:5000 in a browser. Seller mode estimates an expected asking price and 80% range. Buyer mode also compares a listing's asking price with that range. The app uses the committed `models/final_model.joblib`; estimates concern asking prices, not sale prices.
+
 ## Project structure
 
 ```

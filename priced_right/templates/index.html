@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Priced Right?</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <h1>Priced Right?</h1>
+    {% if error %}
+    <p role="alert">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+
+      <fieldset>
+      <legend>Mode</legend>
+      <label>
+          <input type="radio" name="mode" value="seller"
+                {% if form.get("mode", "seller") == "seller" %}checked{% endif %}>
+          Seller
+      </label>
+      <label>
+          <input type="radio" name="mode" value="buyer"
+                {% if form.get("mode") == "buyer" %}checked{% endif %}>
+          Buyer
+      </label>
+      </fieldset>
+        <label for="exact_model">iPhone model</label>
+        <select id="exact_model" name="exact_model">
+            {% for model in models %}
+                <option value="{{ model }}" {% if form.get("exact_model") == model %}selected{% endif %} >{{ model }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="storage_gb">Storage</label>
+        <select id="storage_gb" name="storage_gb">
+            <option value="">I don't know</option>
+            {% for gb in storage_options %}
+                <option value="{{ gb }}"  {% if form.get("storage_gb") == gb|string %}selected{% endif %}>{{ gb }} GB</option>
+            {% endfor %}
+        </select>
+
+        <label for="condition">Condition</label>
+        <select id="condition" name="condition">
+            <option value="">I don't know</option>
+            {% for finnish, english in condition_options.items() %}
+                <option value="{{ finnish }}" {% if form.get("condition") == finnish %}selected{% endif %}>
+                    {{ english }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <fieldset>
+            <legend>Seller type</legend>
+
+            <label>
+                <input type="radio" name="seller_type" value="private"
+                      {% if form.get("seller_type", "private") == "private" %}checked{% endif %}>
+                Private seller
+            </label>
+
+            <label>
+                <input type="radio" name="seller_type" value="retailer"
+                      {% if form.get("seller_type") == "retailer" %}checked{% endif %}>
+                Retailer
+            </label>
+        </fieldset>
+
+        <label>
+        <input type="checkbox" name="mentions_damage" value="yes"
+                {% if form.get("mentions_damage") == "yes" %}checked{% endif %}>
+          Phone has cracks or other damage
+        </label>
+    <div id="buyer-fields">
+        <label for="asking_price">Listing asking price (€), Buyer mode only</label>
+        <input type="number" id="asking_price" name="asking_price"
+       min="0.01" step="0.01" value="{{ form.get('asking_price', '') }}">
+    </div>
+        <button type="submit">Estimate asking price</button>
+    </form>
+<!-- Result -->
+    {% if result %}
+    {% if result.label %}
+        <h2>{{ result.label|capitalize }} comparable listings</h2>
+        <p>Listing asking price: €{{ result.asking_price }}</p>
+    {% endif %}
+        <h2>Expected asking price: €{{ result.price }}</h2>
+        <p>80% range: €{{ result.low }}–€{{ result.high }}</p>
+        {% if result.launch_period == "2016 or earlier" or result.price < 100 %}
+        <p>This is a rough estimate. Asking prices for older or low-priced phones vary more.</p>
+        {% endif %}
+        <p>{{ result.disclaimer }}</p>
+        {% endif %}
+
+
+<script>
+    const buyerFields = document.getElementById("buyer-fields");
+    const askingPriceInput = document.getElementById("asking_price");
+    const modeButtons = document.querySelectorAll('input[name="mode"]');
+
+    function updateBuyerFields() {
+        const selectedMode = document.querySelector('input[name="mode"]:checked').value;
+        buyerFields.hidden = selectedMode !== "buyer";
+        askingPriceInput.required = selectedMode === "buyer";
+    }
+
+    modeButtons.forEach(button => {
+        button.addEventListener("change", updateBuyerFields);
+    });
+
+    updateBuyerFields();
+</script>
+</body>
+</html>
