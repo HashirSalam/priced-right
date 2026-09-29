@@ -29,7 +29,7 @@ already gives us.
 
 ## Roadmap
 
-Where we are (updated 27 Sep): data collected and cleaned, modelling done, final model handed over to the app. The full history is in [docs/project-log.md](docs/project-log.md).
+Where we are (updated 29 Sep): data collected and cleaned, modelling done, and Flask app completed. The full history is in [docs/project-log.md](docs/project-log.md).
 
 ```mermaid
 flowchart LR
@@ -37,13 +37,13 @@ flowchart LR
         direction TB
         a["Repo and package<br/>17 Sep"] --> b["Tori crawler<br/>17 Sep"] --> c["Data: 2,178 iPhones<br/>17 Sep"] --> d["Privacy audit and fixes<br/>17 Sep"] --> e["Cleaning + fixes<br/>2,007 listings"] --> f["First look (EDA)<br/>notebook 1.0"]
     end
-    subgraph ml["Modelling · 27 Sep"]
+    subgraph ml["Modelling and App · 27 -29 Sep"]
         direction TB
-        g["ML plan + fixed<br/>20% test set"] --> h["EDA on training set<br/>notebook 2.0"] --> i["Features, pipelines,<br/>feature check, tuning"] --> j["Error analysis<br/>notebook 3.0"] --> k["Test set, once<br/>RMSLE 0.272"] --> l["Final model<br/>for the app"]
+        g["ML plan + fixed<br/>20% test set"] --> h["EDA on training set<br/>notebook 2.0"] --> i["Features, pipelines,<br/>feature check, tuning"] --> j["Error analysis<br/>notebook 3.0"] --> k["Test set, once<br/>RMSLE 0.272"] --> l["Final model<br/>for the app"] --> m["Flask app"]
     end
     subgraph next["Next"]
         direction TB
-        m["Flask app"] --> n["Report and slides"]
+        n["Report and slides"]
     end
     data --> ml --> next
 
@@ -51,7 +51,7 @@ flowchart LR
     classDef now fill:#EEEDFE,stroke:#534AB7,color:#3C3489
     classDef upcoming fill:#F1EFE8,stroke:#5F5E5A,color:#444441
     class a,b,c,d,e,f,g,h,i,j,k,l done
-    class m now
+    class m done
     class n upcoming
     style data fill:none,stroke:#0F6E56
     style ml fill:none,stroke:#0F6E56
@@ -75,9 +75,10 @@ flowchart LR
 - [x] **Test set, once** ([test-results.md](docs/test-results.md)): all success-bar criteria met; 80% price ranges; fairness by seller type and region
 - [x] **Final model for the app:** retrained on all listings, with `predict()` and `options()` ([model-handover.md](docs/model-handover.md), [model-card.md](docs/model-card.md))
 
+- [x] **Flask app** with seller and buyer modes, built on `priced_right.final_model` ([model-handover.md](docs/model-handover.md))
+
 ### Next
 
-- [ ] **Flask app** with seller and buyer modes, built on `priced_right.final_model` ([model-handover.md](docs/model-handover.md))
 - [ ] **Report and slides:** methods, results, limitations ("asking prices, not sale prices")
 
 ## Results
