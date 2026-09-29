@@ -1,0 +1,24 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 680px;
+    margin: 40px auto;
+    padding: 0 20px;
+    line-height: 1.5;
+}
+
+form {
+    display: grid;
+    gap: 16px;
+}
+
+select,
+input[type="number"],
+button {
+    padding: 10px;
+    font: inherit;
+}
+
+fieldset {
+    border: 1px solid #ccc;
+    padding: 12px;
+}
