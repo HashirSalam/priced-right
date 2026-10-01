@@ -15,19 +15,31 @@ app = Flask(__name__)
 
 LABEL_HEADINGS = {"below": "Below comparable listings", "in line": "In line with comparable listings",
                   "above": "Above comparable listings"}
+MAX_ASKING_PRICE = 10_000   # € — far above any iPhone listing; larger numbers are typos
 
 
 def parse_asking_price(raw: str | None) -> tuple[float | None, str | None]:
-    """(price, None) for a finite number above 0, else (None, message)."""
+    """(price in whole cents, None) for a number above 0 and up to MAX_ASKING_PRICE, else (None, message).
+
+    A decimal comma is accepted too ("250,50"), as Finnish prices are written that way.
+    """
     if not raw:
         return None, "Please enter an asking price for buyer mode."
     try:
-        price = float(raw)
+        price = round(float(raw.strip().replace(",", ".")), 2)
     except ValueError:
         return None, "The asking price must be a number, e.g. 250."
     if not math.isfinite(price) or price <= 0:
         return None, "The asking price must be more than 0 €."
+    if price > MAX_ASKING_PRICE:
+        return None, f"The asking price must be at most {MAX_ASKING_PRICE:,} €.".replace(",", " ")
     return price, None
+
+
+@app.template_filter("euros")
+def euros(amount: float) -> str:
+    """250.0 -> "250", 249.5 -> "249.50": no decimals for whole euros, otherwise cents."""
+    return f"{amount:.0f}" if amount == int(amount) else f"{amount:.2f}"
 
 
 def read_form(form, choices: dict) -> tuple[dict | None, str | None]:
@@ -81,6 +93,7 @@ def index():
         storage_options=choices["storage_gb"],
         condition_options=choices["condition"],
         label_headings=LABEL_HEADINGS,
+        max_asking_price=MAX_ASKING_PRICE,
         result=result,
         error=error,
         form=request.form,

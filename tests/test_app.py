@@ -1,6 +1,6 @@
 import pytest
 
-from priced_right.app import app
+from priced_right.app import LABEL_HEADINGS, app
 from priced_right.final_model import predict
 
 BASE = {"exact_model": "iPhone 13", "storage_gb": "128", "condition": "Hyvä", "seller_type": "private"}
@@ -16,7 +16,7 @@ def test_buyer_result_matches_model():
     expected = predict(exact_model="iPhone 13", storage_gb=128, condition="Hyvä", seller_type="private", asking_price=250)
     page = post(**BASE, mode="buyer", asking_price="250")
     assert f"Expected asking price: €{expected['price']}" in page
-    assert "In line with comparable listings" in page
+    assert LABEL_HEADINGS[expected["label"]] in page
 
 
 @pytest.mark.parametrize("asking_price, heading, words", [
@@ -44,6 +44,9 @@ def test_seller_ignores_asking_price():
     ("0", "The asking price must be more than 0 €."),
     ("inf", "The asking price must be more than 0 €."),
     ("nan", "The asking price must be more than 0 €."),
+    ("0.001", "The asking price must be more than 0 €."),  # rounds to 0.00
+    ("10000.01", "The asking price must be at most 10 000 €."),
+    ("1e6", "The asking price must be at most 10 000 €."),
 ])
 def test_buyer_rejects_invalid_asking_price(asking_price, message):
     page = post(**BASE, mode="buyer", asking_price=asking_price)
@@ -78,3 +81,12 @@ def test_damage_and_retailer_reach_the_model():
 def test_unknown_storage_and_condition_are_allowed():
     expected = predict(exact_model="iPhone 13")
     assert f"Expected asking price: €{expected['price']}" in post(exact_model="iPhone 13", storage_gb="", condition="", mode="seller")
+
+
+@pytest.mark.parametrize("asking_price, shown", [
+    ("250", "€250,"), ("249.5", "€249.50,"), ("250,50", "€250.50,"), (" 1500 ", "€1500,"), ("10000", "€10000,"),
+])
+def test_asking_price_is_shown_plainly(asking_price, shown):
+    page = post(**BASE, mode="buyer", asking_price=asking_price)
+    assert f"Listing asking price: {shown}" in page
+    assert "e+" not in page
