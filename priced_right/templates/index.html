@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     <title>Priced Right?</title>
+    <meta name="description" content="Expected asking prices for second-hand iPhones, from {{ "{:,}".format(n_listings) }} Tori.fi listings. Price it right. Spot a good deal.">
+    <meta name="theme-color" content="#0c0d0f">
+    <link rel="icon" href="{{ url_for('static', filename='icons/favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ url_for('favicon') }}" sizes="16x16 32x32 48x48">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+    <!-- Link previews (iMessage, WhatsApp, Slack, Teams, LinkedIn...) read these; the image needs an absolute URL -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Priced Right?">
+    <meta property="og:title" content="Priced Right? Expected asking prices for second-hand iPhones">
+    <meta property="og:description" content="Selling? Get a starting price. Buying? See if a listing is below, in line with or above similar Tori.fi listings.">
+    <meta property="og:url" content="{{ url_for('index', _external=True) }}">
+    <meta property="og:image" content="{{ url_for('static', filename='og-image.png', _external=True) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Priced Right? An expected asking price of €214 with the range €158 to €291 for an iPhone 13">
+    <meta name="twitter:card" content="summary_large_image">
     <!-- Dark is the default; a saved choice from the theme button wins. Runs before paint to avoid a flash. -->
     <script>
         try {
