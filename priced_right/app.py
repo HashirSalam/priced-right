@@ -114,13 +114,18 @@ def bar_positions(result: dict) -> dict:
 
     The axis runs from 70% of the range's low end to 130% of its high end, so the 80% range sits in
     the middle. A listing price off the axis is drawn at the nearest end, with `listing_outside` set.
+    `start` and `end` are the axis ends in euros (the page script turns a pointer position into a price),
+    and `origin` is where the expected price sits inside the range (%), so the band can grow out from it.
     """
     start, end = result["low"] * 0.7, max(result["high"] * 1.3, result["low"] * 0.7 + 1)
 
     def at(amount: float) -> float:
         return round(min(max((amount - start) / (end - start) * 100, 0), 100), 1)
 
-    bar = {"low": at(result["low"]), "high": at(result["high"]), "price": at(result["price"])}
+    span = result["high"] - result["low"]
+    bar = {"low": at(result["low"]), "high": at(result["high"]), "price": at(result["price"]),
+           "start": round(start, 2), "end": round(end, 2),
+           "origin": round((result["price"] - result["low"]) / span * 100, 1) if span > 0 else 50.0}
     if result.get("asking_price") is not None:
         bar["listing"] = at(result["asking_price"])
         bar["listing_outside"] = not start <= result["asking_price"] <= end

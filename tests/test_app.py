@@ -16,8 +16,8 @@ def post(**data):
 
 
 def price_html(result: dict) -> str:
-    """How the result card shows the expected asking price."""
-    return f'<p class="price">€{result["price"]:,}</p>'
+    """How the result card shows the expected asking price (the number counts up from data-count)."""
+    return f'<p class="price">€<span data-count="{result["price"]}">{result["price"]:,}</span></p>'
 
 
 def test_buyer_result_matches_model():
@@ -36,7 +36,7 @@ def test_buyer_shows_label_and_percentage(asking_price, heading, words):
     expected = predict(exact_model="iPhone 13", storage_gb=128, condition="Hyvä", asking_price=float(asking_price))
     page = post(**BASE, mode="buyer", asking_price=asking_price)
     assert heading in page
-    assert f"{round(abs(expected['difference']) * 100)}{words}" in page
+    assert f">{round(abs(expected['difference']) * 100)}</span>{words}" in page
 
 
 def test_seller_ignores_asking_price():
@@ -131,6 +131,18 @@ def test_bar_positions_clamp_a_listing_off_the_bar(asking_price, end):
     assert bar["listing"] == end and bar["listing_outside"]
 
 
+def test_bar_positions_give_the_axis_in_euros_and_the_band_origin():
+    bar = bar_positions({"low": 150, "high": 250, "price": 175})
+    assert bar["start"] == 105 and bar["end"] == 325      # 70% of low, 130% of high
+    assert bar["origin"] == 25                            # the expected price is a quarter into the band
+
+
+def test_bar_carries_what_the_try_a_price_script_needs():
+    page = post(**BASE, mode="buyer", asking_price="180")
+    assert 'data-start="' in page and 'data-end="' in page and 'data-listing="180' in page
+    assert 'class="bar-guide" hidden' in page and 'class="bar-hint" hidden' in page   # shown only by the script
+
+
 def test_bar_positions_without_a_listing():
     assert "listing" not in bar_positions({"low": 150, "high": 280, "price": 210})
 
@@ -147,7 +159,7 @@ def test_model_groups_cover_every_model_newest_first():
 
 def test_figures_count_up_only_on_a_fresh_page():
     assert f'data-count="{load()["n_listings"]}"' in app.test_client().get("/").get_data(as_text=True)
-    assert "data-count=" not in post(**BASE, mode="seller")
+    assert "<strong data-count=" not in post(**BASE, mode="seller")   # the result's own numbers do count
 
 
 def test_unknown_mode_is_seller_mode():
