@@ -82,8 +82,11 @@
 <!-- Result -->
     {% if result %}
     {% if result.label %}
-        <h2>{{ result.label|capitalize }} comparable listings</h2>
-        <p>Listing asking price: €{{ result.asking_price }}</p>
+        <h2>{{ label_headings[result.label] }}</h2>
+        {% set pct = (result.difference * 100)|abs|round|int %}
+        <p>Listing asking price: €{{ "%g"|format(result.asking_price) }}:
+           {% if pct == 0 %}the same as{% elif result.difference > 0 %}{{ pct }}% above{% else %}{{ pct }}% below{% endif %}
+           the expected asking price.</p>
     {% endif %}
         <h2>Expected asking price: €{{ result.price }}</h2>
         <p>80% range: €{{ result.low }}–€{{ result.high }}</p>
