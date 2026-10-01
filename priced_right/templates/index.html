@@ -156,24 +156,27 @@
             {% if result.label %}
             {% set pct = (result.difference * 100)|abs|round|int %}
             <p class="delta">This listing asks <strong>€{{ result.asking_price|euros }}</strong>,
-                {% if pct == 0 %}the same as{% elif result.difference > 0 %}{{ pct }}% above{% else %}{{ pct }}% below{% endif %}
+                {% if pct == 0 %}the same as{% elif result.difference > 0 %}<span data-count="{{ pct }}">{{ pct }}</span>% above{% else %}<span data-count="{{ pct }}">{{ pct }}</span>% below{% endif %}
                 the expected asking price.</p>
             <p class="eyebrow">Expected asking price</p>
             {% endif %}
 
-            <p class="price">€{{ result.price|euros }}</p>
+            <p class="price">€<span data-count="{{ result.price }}">{{ result.price|euros }}</span></p>
             <p class="range-text">{{ range_pct }}% of similar listings ask
                 <strong>€{{ result.low|euros }}<span class="range-dash">–</span>€{{ result.high|euros }}</strong></p>
 
-            <div class="bar" role="img"
-                 aria-label="Range €{{ result.low|euros }} to €{{ result.high|euros }}, expected €{{ result.price|euros }}{% if result.label %}, this listing €{{ result.asking_price|euros }}{% endif %}">
+            <div class="bar" role="group"
+                 aria-label="Range €{{ result.low|euros }} to €{{ result.high|euros }}, expected €{{ result.price|euros }}{% if result.label %}, this listing €{{ result.asking_price|euros }}{% endif %}"
+                 data-start="{{ bar.start }}" data-end="{{ bar.end }}" data-low="{{ result.low }}" data-high="{{ result.high }}"
+                 data-price="{{ result.price }}"{% if result.label %} data-listing="{{ result.asking_price }}"{% endif %}>
                 {% if bar.listing is defined %}
                 <span class="bar-pin" style="left: {{ bar.listing }}%; --shift: -{{ bar.listing }}%">{% if bar.listing_outside and bar.listing == 0 %}← {% endif %}€{{ result.asking_price|euros }}{% if bar.listing_outside and bar.listing == 100 %} →{% endif %}</span>
                 {% endif %}
                 <div class="bar-track">
-                    <span class="bar-range" style="left: {{ bar.low }}%; width: {{ bar.high - bar.low }}%"></span>
+                    <span class="bar-range" style="left: {{ bar.low }}%; width: {{ bar.high - bar.low }}%; --origin: {{ bar.origin }}%"></span>
                     <span class="bar-dot" style="left: {{ bar.price }}%"></span>
                     {% if bar.listing is defined %}<span class="bar-listing" style="left: {{ bar.listing }}%"></span>{% endif %}
+                    <span class="bar-guide" hidden><span class="bar-readout"><strong></strong> <span class="bar-zone"></span></span></span>
                 </div>
                 <span class="bar-label" style="left: {{ bar.low }}%">€{{ result.low|euros }}</span>
                 <span class="bar-label" style="left: {{ bar.high }}%">€{{ result.high|euros }}</span>
@@ -183,6 +186,10 @@
                 <li><span class="key key-range"></span>Most similar listings</li>
                 {% if result.label %}<li><span class="key key-listing"></span>This listing</li>{% endif %}
             </ul>
+            <p class="bar-hint" hidden>
+                <span class="hint-pointer">Hover the bar to try a price, click to compare it.</span>
+                <span class="hint-touch">Tap the bar to compare a price.</span>
+            </p>
 
             {% if result.launch_period == "2016 or earlier" or result.price < 100 %}
             <p class="note">This is a rough estimate. Asking prices for older or low-priced phones vary more.</p>
@@ -249,21 +256,86 @@
     document.querySelectorAll('input[name="mode"]').forEach(input => input.addEventListener("change", updateBuyerFields));
     updateBuyerFields();
 
-    // Data figures count up from 0 on every page load (the result page after an estimate has no data-count),
-    // unless reduced motion is on. The real numbers are in the HTML, so without JS they simply show as they are.
+    // Numbers with data-count count up from 0, unless reduced motion is on: the data figures on a fresh page,
+    // the price and percentage after an estimate. The real numbers are in the HTML, so without JS they just show.
     (function () {
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         document.querySelectorAll("[data-count]").forEach(figure => {
             const target = Number(figure.dataset.count);
+            const duration = figure.closest(".stats") ? 1600 : 900;
             const start = performance.now();
-            figure.style.minWidth = figure.textContent.length + "ch";   // reserve the final width so the line doesn't shift
+            figure.style.minWidth = figure.getBoundingClientRect().width + "px";   // keep the final width: no shifting
             function frame(now) {
-                const t = Math.min((now - start) / 1600, 1);
+                const t = Math.min((now - start) / duration, 1);
                 figure.textContent = Math.round(target * (1 - Math.pow(1 - t, 3))).toLocaleString("en-US");
                 if (t < 1) requestAnimationFrame(frame);
             }
             figure.textContent = "0";
             requestAnimationFrame(frame);
+        });
+    })();
+
+    // Try a price on the bar: hover (or arrow keys) shows the price at that point and how it would compare;
+    // click (or Enter) compares it in buyer mode. Set up only here, so without JS the bar is a plain picture.
+    (function () {
+        const bar = document.querySelector(".bar[data-start]");
+        if (!bar) return;
+        const track = bar.querySelector(".bar-track");
+        const guide = bar.querySelector(".bar-guide");
+        const [amount, zoneText] = [guide.querySelector("strong"), guide.querySelector(".bar-zone")];
+        const n = name => Number(bar.dataset[name]);
+        const [start, end, low, high, expected] = ["start", "end", "low", "high", "price"].map(n);
+        const listing = bar.dataset.listing ? n("listing") : null;
+        const step = Math.max(1, Math.round((end - start) / 100));
+        const words = {below: "Below", "in-line": "In line", above: "Above"};
+        const phrases = {below: "below", "in-line": "in line with", above: "above"};   // "... comparable listings"
+        const zone = price => price < low ? "below" : price > high ? "above" : "in-line";   // as predict() labels it
+        const euros = price => "€" + Math.round(price).toLocaleString("en-US");
+        let value = listing ?? expected;
+
+        function setValue(price) {   // the slider's value, as screen readers announce it
+            value = Math.round(Math.min(Math.max(price, start), end));
+            track.setAttribute("aria-valuenow", value);
+            track.setAttribute("aria-valuetext", `${euros(value)}, ${phrases[zone(value)]} comparable listings`);
+        }
+        function show(price) {
+            setValue(price);
+            const at = (value - start) / (end - start) * 100;
+            const near = Math.abs(value - expected) <= step ? " · expected"
+                : listing !== null && Math.abs(value - listing) <= step ? " · this listing" : "";
+            guide.hidden = false;
+            guide.style.left = at + "%";
+            guide.style.setProperty("--shift", -at + "%");
+            guide.dataset.zone = zone(value);
+            amount.textContent = euros(value);
+            zoneText.textContent = words[zone(value)] + near;
+        }
+        function fromPointer(event) {
+            const box = track.getBoundingClientRect();
+            return start + (event.clientX - box.left) / box.width * (end - start);
+        }
+        function compare() {
+            const form = document.querySelector("form");
+            form.querySelector('input[name="mode"][value="buyer"]').checked = true;
+            form.elements.asking_price.value = value;
+            form.requestSubmit ? form.requestSubmit() : form.submit();
+        }
+
+        Object.entries({role: "slider", tabindex: "0", "aria-label": "Try an asking price",
+                        "aria-valuemin": Math.round(start), "aria-valuemax": Math.round(end)})
+            .forEach(([name, val]) => track.setAttribute(name, val));
+        setValue(value);
+        document.querySelector(".bar-hint").hidden = false;
+        track.addEventListener("pointermove", event => show(fromPointer(event)));
+        track.addEventListener("pointerleave", () => { if (document.activeElement !== track) guide.hidden = true; });
+        track.addEventListener("click", event => { show(fromPointer(event)); compare(); });
+        track.addEventListener("focus", () => show(value));
+        track.addEventListener("blur", () => { guide.hidden = true; });
+        track.addEventListener("keydown", event => {
+            const moves = {ArrowLeft: -step, ArrowDown: -step, ArrowRight: step, ArrowUp: step,
+                           PageDown: -10 * step, PageUp: 10 * step, Home: start - value, End: end - value};
+            if (event.key in moves) { show(value + moves[event.key]); event.preventDefault(); }
+            else if (event.key === "Enter" || event.key === " ") { compare(); event.preventDefault(); }
         });
     })();
 
