@@ -52,9 +52,9 @@
     <!-- Form: numbered steps -->
     <article class="card form-card">
         <ul class="stats" aria-label="About the data">
-            <li><strong{% if request.method == "GET" %} data-count="{{ n_listings }}"{% endif %}>{{ "{:,}".format(n_listings) }}</strong> listings</li>
-            <li><strong{% if request.method == "GET" %} data-count="{{ n_models }}"{% endif %}>{{ n_models }}</strong> models</li>
-            <li>Tori.fi · {{ collected_at.strftime("%b %Y") }}</li>
+            <li><strong{% if request.method == "GET" %} data-count="{{ n_listings }}"{% endif %}>{{ "{:,}".format(n_listings) }}</strong> <span>listings</span></li>
+            <li><strong{% if request.method == "GET" %} data-count="{{ n_models }}"{% endif %}>{{ n_models }}</strong> <span>models</span></li>
+            <li><strong>{{ collected_at.strftime("%b %Y") }}</strong> <span>Tori.fi data</span></li>
         </ul>
 
         {% if error %}
