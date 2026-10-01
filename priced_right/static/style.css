@@ -220,10 +220,12 @@ body {
     form { gap: var(--space-6); }
 }
 
+/* Three stats, figure over label, so the row never wraps mid-sentence on a phone */
 .stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-1) var(--space-5);
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: space-between;
+    gap: var(--space-4);
     padding: 0 0 var(--space-4);
     margin: 0 0 var(--space-6);
     border-bottom: 1px solid var(--line);
@@ -233,8 +235,8 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
-.stats li { list-style: none; margin: 0; }
-.stats strong { display: inline-block; color: var(--text); font-variant-numeric: tabular-nums; text-align: right; }
+.stats li { display: flex; flex-direction: column; align-items: center; gap: 2px; list-style: none; margin: 0; text-align: center; }
+.stats strong { color: var(--text); font-size: var(--text-base); font-weight: 600; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
 
 /* ---------------------------------------------------------------- form */
 
