@@ -168,9 +168,13 @@ python -m flask --app priced_right.app run
 
 Open http://127.0.0.1:5000 in a browser. Seller mode estimates an expected asking price and 80% range. Buyer mode also compares a listing's asking price with that range. The app uses the committed `models/final_model.joblib`; estimates concern asking prices, not sale prices.
 
+![The app in buyer mode: an iPhone 14 Pro listed at €430 is in line with comparable listings](docs/images/app.png)
+
+The design uses [Pico CSS](https://picocss.com) and the Figtree and JetBrains Mono fonts, all saved in `priced_right/static/` (no requests to other sites, and it works offline), with the project's own theme in `style.css`: dark by default with a light-theme button, and colours, type sizes and spacing kept as tokens at the top of the file. Every input is checked again on the server, and the page works without JavaScript.
+
 ### Deploy (demo)
 
-The app is set up for [Render](https://render.com)'s free plan in `render.yaml`: in the Render dashboard choose **New → Blueprint** and pick this repo. Render installs only `requirements-app.txt` (same versions as the lock file), runs the app with gunicorn on Python 3.13 (`.python-version`) in Frankfurt, and redeploys on every merge to `main`. The free plan sleeps after 15 idle minutes and takes about a minute to wake, so open the URL a few minutes before a demo, and keep `python -m flask --app priced_right.app run` as a local backup.
+The app is set up for [Render](https://render.com)'s free plan in `render.yaml`: in the Render dashboard choose **New → Blueprint** and pick this repo (or create a Web Service with the build and start commands from that file). Render installs only `requirements-app.txt` (same versions as the lock file), runs the app with gunicorn on Python 3.13 (`.python-version`) in Frankfurt, and redeploys on every merge to `main`. The free plan sleeps after 15 idle minutes and takes about a minute to wake, so open the URL a few minutes before a demo, and keep `python -m flask --app priced_right.app run` as a local backup.
 
 ## Project structure
 
@@ -192,7 +196,10 @@ priced-right/
 │   ├── models.py                    feature check, tuning and model choice
 │   ├── ranges.py                    80% price ranges from held-out errors
 │   ├── final_evaluation.py          the one-time test-set evaluation
-│   └── final_model.py               final model retrained on all data; predict() and options() for the app
+│   ├── final_model.py               final model retrained on all data; predict() and options() for the app
+│   ├── app.py                       Flask app: input checks, seller and buyer modes
+│   ├── templates/index.html         the app's page
+│   └── static/                      Pico CSS, fonts and the app's theme (style.css)
 │
 ├── notebooks/
 │   ├── 1.0-eda.ipynb                first look at all the data (the team's first-look session)
@@ -239,14 +246,13 @@ flowchart TB
     final_eval --> results["docs/test-results.md"]
     select --> final_model["final_model.py<br/>retrained on all data"]
     final_model --> saved["models/final_model.joblib"]
-    saved -.-> app["Flask app<br/>next"]
+    saved --> app["app.py<br/>Flask app"]
 
     classDef code fill:#EEEDFE,stroke:#534AB7,color:#3C3489
     classDef data fill:#E1F5EE,stroke:#0F6E56,color:#085041
     classDef todo fill:#F1EFE8,stroke:#5F5E5A,color:#444441,stroke-dasharray: 5 5
-    class client,collect,prep,split,select,final_eval,final_model code
+    class client,collect,prep,split,select,final_eval,final_model,app code
     class raw,reports,clean,results,saved data
-    class app todo
 ```
 
 Add folders only when there is something to put in them. When they are needed, follow the [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org/) conventions:

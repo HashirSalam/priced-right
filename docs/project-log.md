@@ -125,6 +125,17 @@ The modelling followed the data science lifecycle step by step, one PR per stage
 - Retrained on all 2,007 listings and saved as `models/final_model.joblib`. The app uses `options()` for its dropdowns and `predict()` for seller and buyer modes.
 - Tests: 177.
 
+## 1 Oct: app design
+
+The Flask app was redesigned so it looks finished and is easier to read. The model and `predict()` are unchanged.
+
+- **Look:** dark by default with a light-theme button, built on Pico CSS (MIT) plus our own theme. Figtree for text, JetBrains Mono for labels and figures (both SIL Open Font License), one teal accent. CSS and fonts are saved in the repo, so the page makes no requests to other sites. Colours, type sizes and spacing are tokens in `style.css`.
+- **Form:** numbered steps (mode, phone, condition, seller, listing price), condition as cards with a short hint each, models grouped by release year with the newest first. Labels sit inside the fields and stay visible; controls are 52–56 px; field borders meet the 3:1 contrast minimum.
+- **Result:** the expected price as the headline, a verdict badge in buyer mode, and the bar the canvas asks for: the 80% range with markers for the expected price and the listing's price. A "How to read it" panel explains it.
+- **Errors:** the message at the top links to the field, and that field is marked.
+- **References:** Kelley Blue Book (range bar), CarGurus (verdict badges), Zillow (headline price with a range), Apple's forms (field sizes, labels inside fields), GOV.UK (error messages), NN/g and Baymard (label placement and spacing).
+- Tests: 218.
+
 ## Decisions
 
 | Decision | Why | When |
@@ -144,9 +155,10 @@ The modelling followed the data science lifecycle step by step, one PR per stage
 | Region not a model input | Mostly seller mix; no model improved with it. Still used in the fairness check | 27 Sep |
 | Final model: gradient boosting | Best cross-validated RMSLE under the one-standard-error rule | 27 Sep |
 | Price ranges per launch period | Old phones are much harder to price; one width for all under-covered them | 27 Sep |
+| Pico CSS and fonts saved in the repo | Polished defaults without a build step; no visitor data goes to Google Fonts (GDPR), and the demo works offline | 1 Oct |
 
 ## Open
 
 - Friday search-only re-run to see which listings disappeared? Not needed for the model; a new collection would give a fresh test set for a future version.
 - The README collection policy describes collector features not built yet (backoff, contact address, incremental fetching). Waiting for Abtaal.
-- Next: Flask app (built on `priced_right.final_model`), then report and slides.
+- Next: report and slides.
