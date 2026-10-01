@@ -172,6 +172,10 @@ Open http://127.0.0.1:5000 in a browser. Seller mode estimates an expected askin
 
 The design uses [Pico CSS](https://picocss.com) and the Figtree and JetBrains Mono fonts, all saved in `priced_right/static/` (no requests to other sites, and it works offline), with the project's own theme in `style.css`: dark by default with a light-theme button, and colours, type sizes and spacing kept as tokens at the top of the file. Every input is checked again on the server, and the page works without JavaScript.
 
+### Deploy (demo)
+
+The app is set up for [Render](https://render.com)'s free plan in `render.yaml`: in the Render dashboard choose **New → Blueprint** and pick this repo (or create a Web Service with the build and start commands from that file). Render installs only `requirements-app.txt` (same versions as the lock file, which is also passed as a constraint), runs the app with gunicorn on Python 3.13 (`.python-version`) in Frankfurt, and redeploys on every merge to `main`. The free plan sleeps after 15 idle minutes and takes about a minute to wake, so open the URL a few minutes before a demo, and keep `python -m flask --app priced_right.app run` as a local backup.
+
 ## Project structure
 
 ```
