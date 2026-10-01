@@ -26,4 +26,4 @@ def test_render_runs_the_flask_app_with_gunicorn():
     blueprint = (ROOT / "render.yaml").read_text()
     assert "gunicorn" in pins("requirements-app.txt")
     assert "startCommand: gunicorn priced_right.app:app " in blueprint
-    assert "buildCommand: pip install -r requirements-app.txt\n" in blueprint
+    assert "buildCommand: pip install -r requirements-app.txt -c requirements-lock.txt" in blueprint   # lock as constraint

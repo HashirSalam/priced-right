@@ -1,6 +1,7 @@
 # What the deployed app needs, nothing else (no notebooks or plotting), so the server builds fast.
 # Same versions as requirements-lock.txt; scikit-learn must match the version that saved models/final_model.joblib.
-# Refresh: uv pip compile requirements-app.in -c requirements-lock.txt --python-version 3.13 --no-header --no-annotate -o requirements-app.txt
+# Refresh (resolved for Render's Linux servers):
+#   uv pip compile requirements-app.in -c requirements-lock.txt --python-version 3.13 --python-platform x86_64-unknown-linux-gnu --no-header --no-annotate -o requirements-app.txt
 blinker==1.9.0
 click==8.5.0
 cloudpickle==3.1.2

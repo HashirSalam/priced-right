@@ -7,6 +7,6 @@ services:
     plan: free
     region: frankfurt                  # EU servers (GDPR)
     branch: main
-    buildCommand: pip install -r requirements-app.txt
+    buildCommand: pip install -r requirements-app.txt -c requirements-lock.txt   # the lock holds anything not pinned here
     startCommand: gunicorn priced_right.app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 60
     healthCheckPath: /
