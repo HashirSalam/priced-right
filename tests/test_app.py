@@ -49,6 +49,9 @@ def test_seller_ignores_asking_price():
 @pytest.mark.parametrize("asking_price, message", [
     ("", "Please enter an asking price for buyer mode."),
     ("abc", "The asking price must be a number, e.g. 250."),
+    ("   ", "Please enter an asking price for buyer mode."),
+    ("1,500,50", "The asking price must be a number, e.g. 250."),   # one mark can't be both separator and decimal
+    ("1.5.0", "The asking price must be a number, e.g. 250."),
     ("-100", "The asking price must be more than €0."),
     ("0", "The asking price must be more than €0."),
     ("inf", "The asking price must be more than €0."),
@@ -56,6 +59,7 @@ def test_seller_ignores_asking_price():
     ("0.001", "The asking price must be more than €0."),  # rounds to 0.00
     ("10000.01", "The asking price must be at most €10,000."),
     ("1e6", "The asking price must be at most €10,000."),
+    ("10,000.01", "The asking price must be at most €10,000."),
 ])
 def test_buyer_rejects_invalid_asking_price(asking_price, message):
     page = post(**BASE, mode="buyer", asking_price=asking_price)
@@ -100,6 +104,9 @@ def test_unknown_storage_and_condition_are_allowed():
 
 @pytest.mark.parametrize("asking_price, shown", [
     ("250", "€250"), ("249.5", "€249.50"), ("250,50", "€250.50"), (" 1500 ", "€1,500"), ("10000", "€10,000"),
+    ("1,500", "€1,500"), ("1.500", "€1,500"), ("1 500", "€1,500"), ("1\u00a0500,50", "€1,500.50"),   # thousands separators
+    ("1,500.50", "€1,500.50"), ("1.500,50", "€1,500.50"), ("10,000", "€10,000"),
+    ("0,99", "€0.99"), ("250 €", "€250"), ("€250", "€250"),
 ])
 def test_asking_price_is_shown_plainly(asking_price, shown):
     page = post(**BASE, mode="buyer", asking_price=asking_price)

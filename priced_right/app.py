@@ -6,6 +6,7 @@ The form only offers valid choices, but every input is checked again here, becau
 can be sent without the form. Invalid input gets a plain-language message instead of a crash.
 """
 import math
+import re
 from datetime import datetime
 
 from flask import Flask, render_template, request
@@ -25,15 +26,32 @@ OLDEST_OWN_GROUP = 2016    # older models share one dropdown group instead of ma
 MAX_ASKING_PRICE = 10_000   # € — far above any iPhone listing; larger numbers are typos
 
 
+# A number with thousands separators: groups of 3 digits after a "," or "." (the same mark throughout),
+# then optional cents after the other mark. "1,500", "1.500", "12,345.67", "1.500,50"; not "0.001" or "250,50"
+_GROUPED = re.compile(r"([1-9]\d{0,2}(?:([.,])\d{3})(?:\2\d{3})*)(?:([.,])(\d{1,2}))?")
+
+
+def price_text_to_number(raw: str) -> str:
+    """Asking price as typed -> text float() reads: "1 500,50 €" -> "1500.50", "1,500" -> "1500", "250,50" -> "250.50"."""
+    text = re.sub(r"[\s€]", "", raw)              # Finnish thousands spaces (also no-break) and the euro sign
+    grouped = _GROUPED.fullmatch(text)
+    if grouped:
+        whole, group_mark, decimal_mark, cents = grouped.groups()
+        if decimal_mark == group_mark:             # "1,500,50": the same mark can't be both
+            return text
+        return whole.replace(group_mark, "") + (f".{cents}" if cents else "")
+    return text.replace(",", ".")                  # a single decimal comma, as Finnish prices are written
+
+
 def parse_asking_price(raw: str | None) -> tuple[float | None, str | None]:
     """(price rounded to cents, None) for a number above 0 and up to MAX_ASKING_PRICE, else (None, message).
 
-    A decimal comma is accepted too ("250,50"), as Finnish prices are written that way.
+    Thousands separators and a decimal comma are both understood (see price_text_to_number).
     """
-    if not raw:
+    if not raw or not raw.strip():
         return None, "Please enter an asking price for buyer mode."
     try:
-        price = round(float(raw.strip().replace(",", ".")), 2)
+        price = round(float(price_text_to_number(raw)), 2)
     except ValueError:
         return None, "The asking price must be a number, e.g. 250."
     if not math.isfinite(price) or price <= 0:
