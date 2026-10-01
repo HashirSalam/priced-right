@@ -1,4 +1,6 @@
 import re
+import struct
+from pathlib import Path
 
 import pytest
 
@@ -171,3 +173,25 @@ def test_unknown_mode_is_seller_mode():
 def test_asking_price_field_accepts_a_decimal_comma():
     page = app.test_client().get("/").get_data(as_text=True)
     assert 'type="text" id="asking_price"' in page and 'inputmode="decimal"' in page
+
+
+def test_link_previews_get_title_image_and_icons():
+    page = app.test_client().get("/").get_data(as_text=True)
+    for tag in ('property="og:title"', 'property="og:description"', 'property="og:image"', 'name="twitter:card"',
+                'rel="apple-touch-icon"', 'type="image/svg+xml"'):
+        assert tag in page
+
+
+def test_preview_image_link_is_https_behind_the_hosts_proxy():
+    page = app.test_client().get("/", headers={"X-Forwarded-Proto": "https", "X-Forwarded-Host": "priced-right.onrender.com"})
+    assert 'content="https://priced-right.onrender.com/static/og-image.png"' in page.get_data(as_text=True)
+
+
+def test_favicon_is_served_at_the_site_root():
+    response = app.test_client().get("/favicon.ico")
+    assert response.status_code == 200 and response.mimetype == "image/vnd.microsoft.icon"
+
+
+def test_preview_image_is_1200_by_630():
+    header = (Path(app.static_folder) / "og-image.png").read_bytes()[:24]
+    assert header[:8] == b"\x89PNG\r\n\x1a\n" and struct.unpack(">II", header[16:24]) == (1200, 630)

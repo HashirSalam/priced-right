@@ -8,14 +8,19 @@ can be sent without the form. Invalid input gets a plain-language message instea
 import math
 import re
 from datetime import datetime
+from pathlib import Path
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from priced_right.final_model import load, options, predict
 from priced_right.preprocess import model_info
 from priced_right.ranges import LEVEL
 
 app = Flask(__name__)
+# Render (like most hosts) serves the app behind one proxy that ends HTTPS; trust its X-Forwarded-Proto/-Host
+# headers so absolute links, such as the share-preview image, start with https:// and the public host
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 LABEL_HEADINGS = {"below": "Below comparable listings", "in line": "In line with comparable listings",
                   "above": "Above comparable listings"}
@@ -130,6 +135,12 @@ def bar_positions(result: dict) -> dict:
         bar["listing"] = at(result["asking_price"])
         bar["listing_outside"] = not start <= result["asking_price"] <= end
     return bar
+
+
+@app.route("/favicon.ico")
+def favicon():
+    """Browsers and link previews ask for /favicon.ico at the site root, whatever the page links to."""
+    return send_from_directory(Path(app.static_folder) / "icons", "favicon.ico", mimetype="image/vnd.microsoft.icon")
 
 
 @app.route("/", methods=["GET", "POST"])
