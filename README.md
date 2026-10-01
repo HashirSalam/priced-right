@@ -168,6 +168,10 @@ python -m flask --app priced_right.app run
 
 Open http://127.0.0.1:5000 in a browser. Seller mode estimates an expected asking price and 80% range. Buyer mode also compares a listing's asking price with that range. The app uses the committed `models/final_model.joblib`; estimates concern asking prices, not sale prices.
 
+### Deploy (demo)
+
+The app is set up for [Render](https://render.com)'s free plan in `render.yaml`: in the Render dashboard choose **New → Blueprint** and pick this repo. Render installs only `requirements-app.txt` (same versions as the lock file), runs the app with gunicorn on Python 3.13 (`.python-version`) in Frankfurt, and redeploys on every merge to `main`. The free plan sleeps after 15 idle minutes and takes about a minute to wake, so open the URL a few minutes before a demo, and keep `python -m flask --app priced_right.app run` as a local backup.
+
 ## Project structure
 
 ```

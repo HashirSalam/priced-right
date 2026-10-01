@@ -1,0 +1,7 @@
+# Packages the deployed app imports, plus its web server; compiled into requirements-app.txt
+flask
+numpy
+pandas
+scipy
+scikit-learn
+gunicorn

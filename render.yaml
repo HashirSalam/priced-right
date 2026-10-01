@@ -1,0 +1,12 @@
+# Render Blueprint for the demo: New > Blueprint in the Render dashboard, then pick this repo.
+# Free plan: sleeps after 15 idle minutes and takes about a minute to wake, so open it before presenting.
+services:
+  - type: web
+    name: priced-right
+    runtime: python
+    plan: free
+    region: frankfurt                  # EU servers (GDPR)
+    branch: main
+    buildCommand: pip install -r requirements-app.txt
+    startCommand: gunicorn priced_right.app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 60
+    healthCheckPath: /
