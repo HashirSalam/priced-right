@@ -38,9 +38,11 @@ def read_form(form, choices: dict) -> tuple[dict | None, str | None]:
 
     storage = form.get("storage_gb") or None
     if storage is not None:
-        if not storage.isdigit() or int(storage) not in choices["storage_gb"]:
+        # Compare the text itself: int() fails on some strings isdigit() accepts, such as "²"
+        allowed = {str(size): size for size in choices["storage_gb"]}
+        if storage not in allowed:
             return None, "Please choose a storage size from the list."
-        storage = int(storage)
+        storage = allowed[storage]
 
     condition = form.get("condition") or None
     if condition is not None and condition not in choices["condition"]:

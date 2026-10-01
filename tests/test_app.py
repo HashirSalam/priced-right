@@ -57,6 +57,8 @@ def test_buyer_rejects_invalid_asking_price(asking_price, message):
     ("storage_gb", "xyz", "Please choose a storage size from the list."),
     ("storage_gb", "-128", "Please choose a storage size from the list."),
     ("storage_gb", "100", "Please choose a storage size from the list."),
+    ("storage_gb", "²", "Please choose a storage size from the list."),  # a digit to isdigit(), not to int()
+    ("storage_gb", "9" * 5000, "Please choose a storage size from the list."),  # longer than int() converts
     ("condition", "Rikki", "Please choose a condition from the list."),
     ("seller_type", "dealer", "Please choose private seller or retailer."),
 ])
