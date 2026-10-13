@@ -11,7 +11,7 @@ Cleaning removed accessories, spare parts, placeholder prices, multi-phone bundl
 
 \section{Model selection}
 
-Because effects such as these are multiplicative, all models were trained on $\log(1+\text{price})$ and compared by the root mean squared logarithmic error (RMSLE); we also report the mean absolute error (MAE). Every score came from the same five-fold grouped cross-validation, with all preprocessing inside scikit-learn pipelines on training folds only \parencite{pedregosa2011scikit}. Inputs were limited to what a user knows before posting an advertisement. A feature check kept the phone model, condition, storage, seller type and mentioned damage, and dropped battery, region and the other text flags, which changed the RMSLE by 0.002 or less. Five tuned model families were compared with a lookup baseline, the median price of the same model and storage (Table~\ref{table:cv}).
+Because effects such as these are multiplicative, all models were trained on $\log(1+\text{price})$ and compared by the root mean squared logarithmic error (RMSLE); we also report the mean absolute error (MAE). Every score came from the same five-fold grouped cross-validation, with all preprocessing inside scikit-learn pipelines on training folds only \parencite{pedregosa2011scikit}. Inputs were limited to what a user knows before posting an advertisement. A feature check kept the phone model, condition, storage, seller type and mentioned damage, and dropped battery, region, shipping and the other text flags, which changed the RMSLE by 0.002 or less. Five tuned model families were compared with a lookup baseline, the median price of the same model and storage (Table~\ref{table:cv}).
 
 \tagpdfsetup{table/header-rows={1}}
 \begin{table}[ht!]
@@ -55,7 +55,7 @@ Median percentage error & 14.3\% & 16.5\% \\
 \label{table:test}
 \end{table}
 
-Because one number hides uncertainty, each estimate comes with an 80\% range: a conformal interval built from out-of-fold errors, with a separate width per launch period in the spirit of Mondrian conformal prediction \parencite{vovk2005algorithmic}. Old phones, which are harder to price, get wider ranges (a factor of 1.97 for 2016 or earlier against 1.19 for 2023 or later). The ranges covered 77\% of test listings, 78\% for private sellers and 75\% for retailers. Errors were uneven, with a median of 7\% for phones from 2023 or later but 27\% for 2016 or earlier; the weakest group was the 82 listings asking under 100~euros, often broken phones listed as working, where estimates were 28\% too high on average and the ranges covered only 65\%.
+Because one number hides uncertainty, each estimate comes with an 80\% range: a conformal interval built from out-of-fold errors, with a separate width per launch period in the spirit of Mondrian conformal prediction \parencite{vovk2005algorithmic}. Old phones, which are harder to price, get wider ranges (a factor of 1.86 for 2016 or earlier against 1.19 for 2023 or later). The ranges covered 77\% of test listings, 78\% for private sellers and 75\% for retailers. Errors were uneven, with a median of 7\% for phones from 2023 or later but 27\% for 2016 or earlier; the weakest group was the 82 listings asking 100~euros or less, which include broken phones listed as working, where estimates were typically 28\% too high and the ranges covered only 65\%.
 
 \section{The application}
 

@@ -49,7 +49,7 @@ Learning paradigms \textrightarrow\ Supervised learning \textrightarrow\ Supervi
 \maketitle
 
 \mscabstract{
-Second-hand sellers on Tori.fi guess their asking prices, and buyers cannot easily tell whether a listing is fair. We collected 2,007 cleaned iPhone listings, trained five regression models on a grouped development set, and chose gradient boosting with rules fixed in advance. On 405 held-out listings it reached an RMSLE of 0.272, 27\% below a lookup baseline, with a mean absolute error of 46~euros. Calibrated 80\% ranges covered 77\% of test listings. A Flask application turns the model into a seller and buyer tool. Estimates describe asking prices, not sale prices, and are weakest for phones under 100~euros.
+Second-hand sellers on Tori.fi guess their asking prices, and buyers cannot easily tell whether a listing is fair. We cleaned 2,178 collected iPhone listings to 2,007, trained five regression models on a grouped development set, and chose gradient boosting with rules fixed in advance. On 405 held-out listings it reached an RMSLE of 0.272, 27\% below a lookup baseline, with a mean absolute error of 46~euros. Calibrated 80\% ranges covered 77\% of test listings. A Flask application serves sellers and buyers. Estimates describe asking prices, not sale prices, and are weakest for phones under 100~euros.
 }
 
 %% Formatting, do not modify
