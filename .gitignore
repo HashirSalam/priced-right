@@ -21,3 +21,6 @@ venv/
 *.egg-info/
 build/
 dist/
+
+# LaTeX build output
+report/build/

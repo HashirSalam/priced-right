@@ -1,0 +1,10 @@
+\chapter{\introtitle}
+\label{chap:intro}
+
+Sellers on Tori.fi, a major Finnish second-hand marketplace, have to guess an asking price. A price that is too high leaves a listing without replies for weeks, while a price that is too low gives money away. Buyers face the opposite problem: to judge whether a listing is fair, they would have to compare dozens of similar advertisements by hand. Thousands of listings contain the signal both groups need, but no individual user can aggregate it efficiently.
+
+Priced Right? turns these listings into a decision aid for second-hand iPhones. In \emph{seller mode}, a user describes a phone and receives an expected asking price with an 80\% range. In \emph{buyer mode}, the user also enters a listing's price and learns whether it is below, in line with or above comparable listings. Because Tori never publishes final sale prices, every estimate describes what sellers \emph{ask}, not what phones sell for, and a price above the range is unusual rather than wrong.
+
+The project canvas originally covered phones and furniture, with bicycles as a stretch goal. We narrowed the scope to iPhones because Tori records their model, storage and graded condition as structured attributes, which makes the notion of a comparable listing precise. Collecting one category thoroughly also allowed more careful cleaning and evaluation than three categories collected thinly. The approach itself is general: any Tori category whose listings carry structured attributes could be added in the same way, and iPhones are its first application.
+
+Chapter~\ref{chap:body} describes the data collection and cleaning, the model selection, the held-out results with their price ranges, and the web application. Chapter~\ref{chap:concl} discusses limitations, future work and what we learned.

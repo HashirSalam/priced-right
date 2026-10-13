@@ -1,0 +1,28 @@
+\ProvidesDictionary{translator-UHDSreport-coverpage-dictionary}{Finnish}
+\providetranslation{translation-UHDSreport-coverpage-dictionary}{Finnish}
+
+\providetranslation{dsm-level}{Raportti}
+\providetranslation{instructions}{Käyttöohjeet}
+
+\providetranslation{dsm-programme}{Datatieteen maisteriohjelma}
+\providetranslation{department2018}{Tietojenkäsittelytieteen osasto}
+\providetranslation{uh}{Helsingin yliopisto}
+\providetranslation{helsinki}{Helsinki}
+\providetranslation{faculty}{Matemaattis-luonnontieteellinen tiedekunta}
+\providetranslation{address}{PL 68 (Pietari Kalmin katu 5)\newline 00014 Helsingin yliopisto}
+\providetranslation{eaddress}{URL: \href{https://www.cs.helsinki.fi/}{https://www.cs.helsinki.fi/}}
+\providetranslation{ytiedot}{Yhteystiedot}
+\providetranslation{supervisors}{Ohjaaja(t)}
+\providetranslation{examiners}{Tarkastaja(t)}
+\providetranslation{library}{ }
+\providetranslation{appendices}{liitettä}
+\providetranslation{appendice pages}{liitesivua}
+\providetranslation{pp}{sivua}
+\providetranslation{flame-alt}{Helsingin yliopiston liekkimerkki Matemaattis-luonnontieteellisen tiedekunnan väreissä eli oranssina}
+\providetranslation{page}{sivu}
+\providetranslation{pages}{sivua}
+
+\providetranslation{bibname}{Lähteet}
+\providetranslation{introtitle}{Johdanto}
+\providetranslation{concltitle}{Johtopäätökset}
+\providetranslation{aiusetitle}{Tekoälyn käyttö tutkielmassa}

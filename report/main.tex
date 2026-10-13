@@ -1,0 +1,74 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Technical report for the DATA11001 mini project "Priced Right?",
+%% written with the University of Helsinki Data Science report template.
+%% Build from this folder: latexmk  (LuaLaTeX + Biber, output in build/)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DocumentMetadata{
+  lang        = en,
+  pdfstandard = ua-2,
+  pdfstandard = a-4f,
+  tagging=on,
+  tagging-setup={math/setup=mathml-SE},
+  colorprofiles= {
+  A = sRGB.icc,
+  X = sRGB.icc,
+  ISO_PDFE1 = sRGB.icc
+  }
+}
+
+\documentclass[english, dsm, a4paper]{uh-ds-report}
+
+\usepackage{amsthm,amsmath}
+\usepackage{booktabs}
+
+%% Cover and abstract form: "Technical Report" instead of the template's "Report"
+\deftranslation[to=English]{dsm-level}{Technical Report}
+
+\widowpenalty=10000
+\clubpenalty=10000
+
+%% APA style, as in the Data Science report template
+\usepackage[backend=biber,style=apa,doi=true,url=true,%
+            urldate=short,labeldate=year,%
+            datezeros=false]{biblatex}
+\addbibresource{references.bib}
+
+\supervisors{}
+\keywords{price prediction, gradient boosting, second-hand marketplace, conformal prediction}
+\additionalinformation{}
+\classification{\protect{\ \\
+\  Computing methodologies \textrightarrow\ Machine learning \textrightarrow\
+Learning paradigms \textrightarrow\ Supervised learning \textrightarrow\ Supervised learning by regression
+}}
+
+%% Title line breaks on the cover only, not in the abstract form
+\newcommand{\titlebreak}{\\}
+
+\begin{document}
+
+\title{Priced Right?\texorpdfstring{\titlebreak}{} Estimating asking prices of\texorpdfstring{\titlebreak}{} products on Tori.fi}
+\author{Abtaal Aatif, Hashir Salam Awan and Hafiz Khurram Javid}
+
+\maketitle
+\renewcommand{\titlebreak}{}
+
+\mscabstract{
+Second-hand sellers on Tori.fi guess their asking prices, and buyers cannot easily tell whether a listing is fair. We cleaned 2,178 collected iPhone listings to 2,007, trained five regression models on a grouped development set, and chose gradient boosting with rules fixed in advance. On 405 held-out listings it reached an RMSLE of 0.272, 27\% below a lookup baseline, with a mean absolute error of 46~euros. Calibrated 80\% ranges covered 77\% of test listings. A Flask application serves sellers and buyers. Estimates describe asking prices, not sale prices, and are weakest for phones under 100~euros.
+}
+
+%% Formatting, do not modify
+\cleardoublepage
+\pagenumbering{gobble}
+\tableofcontents
+\cleardoublepage
+\pagenumbering{arabic}
+
+\include{Ch.01_Introduction}
+\include{Ch.02_Body}
+\include{Ch.04_Conclusions}
+
+\printbibliography[heading=bibintoc,title=\mybibname]\label{last_bib_page}
+
+\appendix
+
+\end{document}

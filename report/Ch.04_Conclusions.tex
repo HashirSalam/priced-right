@@ -1,0 +1,10 @@
+\chapter{\concltitle}
+\label{chap:concl}
+
+Priced Right? shows that a few structured attributes of an iPhone listing explain most of its asking price. Gradient boosting on launch year, product line, condition, storage, seller type and mentioned damage reduced the error of a model-and-storage lookup by 27\% on held-out listings, and calibrated ranges communicate the remaining uncertainty honestly.
+
+The results have clear limits. The model learns what sellers ask, not what buyers pay, because Tori does not publish sale prices. The data are one snapshot of one marketplace on 17 September 2026, so we cannot tell which listings sold or how long they stayed online, and seasonal effects are not captured. The model is least reliable for phones under about 100~euros, where estimates are too high and the ranges miss a third of listings. Reworded reposts may escape duplicate detection, and the project covers iPhones only rather than the furniture and bicycles in the canvas.
+
+Future work follows from these limits. Repeated collections would show which listings disappear, giving a proxy for selling prices and a fresh test set, and the share of listings inside their range would serve as a drift check. The model should be retrained each September when Apple releases new phones, and quantile regression or a separate model could improve the estimates for cheap and broken phones.
+
+We also learned that data collection is an engineering task in its own right: respecting robots rules, parsing embedded JSON and auditing for personal data took as much care as the modelling. Cleaning mattered as much as the choice of algorithm, since accessories, spare parts and other brands hidden among the listings would otherwise have distorted the model. Fixing the evaluation rules before modelling and opening the test set once made the final numbers trustworthy, and from the modelling stage on, every change went through a reviewed pull request with automated tests.
