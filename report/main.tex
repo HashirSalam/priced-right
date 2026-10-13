@@ -41,12 +41,16 @@
 Learning paradigms \textrightarrow\ Supervised learning \textrightarrow\ Supervised learning by regression
 }}
 
+%% Title line breaks on the cover only, not in the abstract form
+\newcommand{\titlebreak}{\\}
+
 \begin{document}
 
-\title{Priced Right? Estimating asking prices of products on Tori.fi}
+\title{Priced Right?\texorpdfstring{\titlebreak}{} Estimating asking prices of\texorpdfstring{\titlebreak}{} products on Tori.fi}
 \author{Abtaal Aatif, Hashir Salam Awan and Hafiz Khurram Javid}
 
 \maketitle
+\renewcommand{\titlebreak}{}
 
 \mscabstract{
 Second-hand sellers on Tori.fi guess their asking prices, and buyers cannot easily tell whether a listing is fair. We cleaned 2,178 collected iPhone listings to 2,007, trained five regression models on a grouped development set, and chose gradient boosting with rules fixed in advance. On 405 held-out listings it reached an RMSLE of 0.272, 27\% below a lookup baseline, with a mean absolute error of 46~euros. Calibrated 80\% ranges covered 77\% of test listings. A Flask application serves sellers and buyers. Estimates describe asking prices, not sale prices, and are weakest for phones under 100~euros.
