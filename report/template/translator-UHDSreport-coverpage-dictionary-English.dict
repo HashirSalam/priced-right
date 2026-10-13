@@ -1,0 +1,31 @@
+\ProvidesDictionary{translator-UHDSreport-coverpage-dictionary}{English}
+\providetranslation{translation-UHDSreport-coverpage-dictionary}{English}
+
+\providetranslation{dsm-level}{Report}
+\providetranslation{msc-level}{Report}
+\providetranslation{instructions}{User guides}
+
+
+\providetranslation{dsm-programme}{Master's Programme in Data Science}
+\providetranslation{msc-programme}{Master's Programmes in Data Science}
+\providetranslation{department2018}{Department of Computer Science}
+\providetranslation{uh}{University of Helsinki}
+\providetranslation{helsinki}{Helsinki}
+\providetranslation{faculty}{Faculty of Science}
+\providetranslation{address}{P. O. Box 68 (Pietari Kalmin katu 5)\newline 00014 University of Helsinki, Finland}
+\providetranslation{eaddress}{URL: \url{https://www.cs.helsinki.fi/}}
+\providetranslation{ytiedot}{Contact information}
+\providetranslation{library}{ }
+\providetranslation{supervisors}{Supervisor(s)}
+\providetranslation{examiners}{Examiner(s)}
+\providetranslation{appendices}{appendices}
+\providetranslation{appendice pages}{appendix pages}
+\providetranslation{pp}{pages}
+\providetranslation{flame-alt}{The University of Helsinki flame emblem in Faculty of Science colour, that is to say orange}
+\providetranslation{page}{page}
+\providetranslation{pages}{pages}
+
+\providetranslation{bibname}{References}
+\providetranslation{introtitle}{Introduction}
+\providetranslation{concltitle}{Conclusions}
+\providetranslation{aiusetitle}{Use of AI in the thesis}
