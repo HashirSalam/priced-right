@@ -72,7 +72,7 @@ The scrubber was extended (`_PHONE_RE`, a catch-all `_LONG_NUMBER_RE`, and `_PER
 - **Raw data exception:** `data/raw/` is otherwise never edited after collection; a privacy fix is the one allowed exception.
 - **Git history:** the earlier commit `dad9a23` still contains the missed numbers. History was not rewritten, a choice kept when the repository was made public for grading.
 - **Addresses and links:** all 47 street addresses are shops'. Of 141 descriptions with links, 133 are shops'; the 8 from private sellers point to product pages (Verkkokauppa, Apple support, GSMArena) and a news article, except one link to a seller's personal website, which was masked as `[url]`.
-- **Ad text kept local:** descriptions can mention first names, so titles and descriptions were removed from the repository on 16 Oct, before it was made public. `iphones_clean.csv` keeps the features derived from them.
+- **Ad text kept local:** descriptions can mention first names, so titles and descriptions were removed from the current files on 16 Oct, before the repository was made public. Earlier commits still contain the scrubbed text. `iphones_clean.csv` keeps the features derived from them.
 
 ## Legal and ethical context
 

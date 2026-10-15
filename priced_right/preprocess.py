@@ -133,8 +133,8 @@ def load_text() -> pd.DataFrame:
     """Titles and descriptions of the cleaned listings, keyed by listing_id (local only)."""
     path = PROCESSED_DIR / "iphones_text.csv"
     if not path.exists():
-        raise FileNotFoundError(f"{path.relative_to(REPO_ROOT)} is missing: ad text is not in the repository; "
-                                "collect a run and rerun preprocess to create it")
+        raise FileNotFoundError(f"{path.relative_to(REPO_ROOT)} is missing: ad text is not in the repository. "
+                                "preprocess writes it from the local raw listings, which only the collectors have")
     return pd.read_csv(path, dtype={"listing_id": str})
 
 
@@ -368,7 +368,11 @@ def main() -> None:
     args = parser.parse_args()
 
     run_dir = (args.run or latest_run()).resolve()
-    raw = pd.read_csv(run_dir / "listings.csv", dtype={"listing_id": str})
+    listings_path = run_dir / "listings.csv"
+    if not listings_path.exists():
+        raise SystemExit(f"{listings_path} is missing: raw listings hold ad text and stay local. "
+                         "data/processed/iphones_clean.csv is committed, so skip this step.")
+    raw = pd.read_csv(listings_path, dtype={"listing_id": str})
     df, log = clean(raw)
 
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)

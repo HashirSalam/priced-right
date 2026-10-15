@@ -139,7 +139,7 @@ The Flask app was redesigned so it looks finished and is easier to read. The mod
 ## 16 Oct: ad text out of the repository
 
 - The course grades from a public repository, so titles and descriptions no longer go into git. `preprocess.py` writes them to a local, git-ignored `iphones_text.csv`, and the raw files that hold them (`listings.csv`, `*_records.jsonl`) are git-ignored. `iphones_clean.csv` is unchanged apart from those two columns, so the model and test results stay the same.
-- A scan of the current files found no phone numbers, emails or social handles. Commit `dad9a23` still holds the numbers fixed in `9e75c5d`; history was not rewritten.
+- A scan of the current files found no phone numbers, emails or social handles. History was not rewritten: earlier commits keep the scrubbed ad text, and `dad9a23` the numbers fixed in `9e75c5d`.
 
 ## Decisions
 

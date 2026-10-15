@@ -100,7 +100,7 @@ RMSLE is 27% below the baseline's (95% CI 19–35%), meeting every criterion of 
 Run from the repo root, in this order. Each step writes what the next one reads.
 
 ```bash
-python -m priced_right.preprocess          # clean raw listings -> data/processed/iphones_clean.csv
+python -m priced_right.preprocess          # clean raw listings -> data/processed/iphones_clean.csv (needs the local raw data; skip it otherwise, the output is committed)
 python -m priced_right.split               # fixed 20% test set (already created; refuses to redraw)
 python -m priced_right.models check        # feature check on the training set -> docs/feature-check.md
 python -m priced_right.models tune         # tune and compare 5 models -> docs/model-comparison.md
@@ -264,11 +264,11 @@ Add folders only when there is something to put in them. When they are needed, f
 - `notebooks/`: numbered with initials, e.g. `1.0-hsa-eda.ipynb`, `2.0-aa-baseline.ipynb`
 - `models/`: saved fitted pipelines for the app
 - `reports/figures/`: figures for the report
-- `data/processed/`: cleaned data, always rebuilt by code from `data/raw/`, which is never edited by hand
+- `data/processed/`: cleaned data, always rebuilt by code from `data/raw/`, which is never edited by hand (rebuilding needs the local raw listings)
 
 `data/` is committed so the whole group works from the same dataset, except ad titles and
-descriptions: free text written by sellers stays local (git-ignored), so the repository can be
-public. That means `listings.csv`, the `*_records.jsonl` files and `data/processed/iphones_text.csv`;
+descriptions: free text written by sellers stays local (git-ignored), so the current files can be
+public (commits before 16 Oct still contain the scrubbed text). That means `listings.csv`, the `*_records.jsonl` files and `data/processed/iphones_text.csv`;
 preprocessing needs them, but training, the tests and the app run on `iphones_clean.csv`. A full iPhone run is about
 5 MB; three weeks of daily snapshots would run to hundreds of megabytes, so revisit this before
 daily collection starts.
