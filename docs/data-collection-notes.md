@@ -11,7 +11,7 @@ Rules the collector follows, all implemented in [`priced_right/tori.py`](../pric
 3. **Honest user agent:** `priced-right/0.1 (student data science project; non-commercial)`. Tori serves it normally.
 4. **Plain HTTP, no browser.** Pages are rendered on the server with the data embedded as JSON; responses take ~0.3 s.
 5. **Data minimization at collection time:** records keep only the fields in [data-dictionary.md](data-dictionary.md). Contact details in titles and descriptions are scrubbed before writing (links to personal pages and social profiles, emails, Finnish phone numbers including WhatsApp links, and any other 9–12 digit number), and forbidden keys (seller ID, coordinates, images, …) fail the run.
-6. **Storage:** minimized records go to `data/raw/tori/<run>/` and are committed so the group shares one dataset. Descriptions are scrubbed of phone numbers and emails but can still mention names, so the repository must stay private.
+6. **Storage:** minimized records go to `data/raw/tori/<run>/`. Descriptions are scrubbed of phone numbers and emails but can still mention names, so the files with ad text (`listings.csv`, `*_records.jsonl`) stay local and git-ignored; the run metadata, failures and log are committed.
 
 ## Tori.fi: how the site exposes data
 
@@ -70,9 +70,9 @@ A scan of the full run on 2026-09-17 found **10 contact numbers the first scrubb
 The scrubber was extended (`_PHONE_RE`, a catch-all `_LONG_NUMBER_RE`, and `_PERSONAL_LINK_RE` for personal sites and social profiles in `tori.py`), with unit cases that keep prices, dates, 15-digit IMEIs and shop links intact. The saved data was then re-scrubbed offline, without new requests, and `listings.csv` and the summary were rebuilt; both steps are logged in the run's `collect.log`. A final scan finds no phone numbers, WhatsApp links, emails or 9–12 digit runs in titles or descriptions.
 
 - **Raw data exception:** `data/raw/` is otherwise never edited after collection; a privacy fix is the one allowed exception.
-- **Git history:** the earlier commit `dad9a23` still contains the missed numbers. The repository is private, so history was not rewritten.
+- **Git history:** the earlier commit `dad9a23` still contains the missed numbers. History was not rewritten, a choice kept when the repository was made public for grading.
 - **Addresses and links:** all 47 street addresses are shops'. Of 141 descriptions with links, 133 are shops'; the 8 from private sellers point to product pages (Verkkokauppa, Apple support, GSMArena) and a news article, except one link to a seller's personal website, which was masked as `[url]`.
-- **Still private:** descriptions can mention first names, so the repository must stay private.
+- **Ad text kept local:** descriptions can mention first names, so titles and descriptions were removed from the current files on 16 Oct, before the repository was made public. Earlier commits still contain the scrubbed text. `iphones_clean.csv` keeps the features derived from them.
 
 ## Legal and ethical context
 
@@ -116,7 +116,7 @@ python3 -m priced_right.collect_iphones --max-pages 1 --max-items 5 --no-commit-
 
 | Run | Listings | Report |
 |---|---|---|
-| `iphones_2026-09-17T110158Z` | 2,178 (2,195 found; 17 removed or inactive during the run) | [report](runs/iphones_2026-09-17T110158Z.md), [summary](runs/iphones_2026-09-17T110158Z.json), data: `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` |
+| `iphones_2026-09-17T110158Z` | 2,178 (2,195 found; 17 removed or inactive during the run) | [report](runs/iphones_2026-09-17T110158Z.md), [summary](runs/iphones_2026-09-17T110158Z.json), data: `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` (local only) |
 
 ## Crawl4AI (Docker)
 

@@ -1,5 +1,9 @@
-# data/ is committed so the group shares one dataset. Listing descriptions are
-# free text written by sellers, so this repository must stay private.
+# data/ is committed so the group shares one dataset, except ad titles and
+# descriptions: free text written by sellers, kept local so the repository can be public.
+data/raw/tori/*/listings.csv
+data/raw/tori/*/item_records.jsonl
+data/raw/tori/*/search_records.jsonl
+data/processed/iphones_text.csv
 
 # Secrets
 .env
