@@ -2,6 +2,8 @@
 
 Scope: for-sale iPhone listings in Tori's phone category (`Matkapuhelimet`, brand Apple). We collect only the fields the model and the fairness audit need. Everything else Tori exposes is dropped when the record is built (`priced_right/tori.py`), before anything is written to disk.
 
+`title` and `description` are free text written by sellers and stay local (git-ignored): the repository keeps only the features derived from them, in `data/processed/iphones_clean.csv`.
+
 Coverage figures come from the full collection run on 2026-09-17: 2,178 listings, see [runs/iphones_2026-09-17T110158Z.md](runs/iphones_2026-09-17T110158Z.md).
 
 ## Target

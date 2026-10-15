@@ -136,6 +136,11 @@ The Flask app was redesigned so it looks finished and is easier to read. The mod
 - **References:** Kelley Blue Book (range bar), CarGurus (verdict badges), Zillow (headline price with a range), Apple's forms (field sizes, labels inside fields), GOV.UK (error messages), NN/g and Baymard (label placement and spacing).
 - Tests: 218.
 
+## 16 Oct: ad text out of the repository
+
+- The course grades from a public repository, so titles and descriptions no longer go into git. `preprocess.py` writes them to a local, git-ignored `iphones_text.csv`, and the raw files that hold them (`listings.csv`, `*_records.jsonl`) are git-ignored. `iphones_clean.csv` is unchanged apart from those two columns, so the model and test results stay the same.
+- A scan of the current files found no phone numbers, emails or social handles. Commit `dad9a23` still holds the numbers fixed in `9e75c5d`; history was not rewritten.
+
 ## Decisions
 
 | Decision | Why | When |
@@ -156,6 +161,7 @@ The Flask app was redesigned so it looks finished and is easier to read. The mod
 | Final model: gradient boosting | Best cross-validated RMSLE under the one-standard-error rule | 27 Sep |
 | Price ranges per launch period | Old phones are much harder to price; one width for all under-covered them | 27 Sep |
 | Pico CSS and fonts saved in the repo | Polished defaults without a build step; no visitor data goes to Google Fonts (GDPR), and the demo works offline | 1 Oct |
+| Ad titles and descriptions kept out of git | They can name people; the repository is public for grading | 16 Oct |
 
 ## Open
 

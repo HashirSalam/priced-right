@@ -11,7 +11,8 @@ Run from the repository root:
     python3 -m priced_right.collect_iphones --max-pages 1 --max-items 5    # smoke test
 
 Outputs:
-    data/raw/tori/iphones_<timestamp>/      records, listings.csv, failures, log (committed)
+    data/raw/tori/iphones_<timestamp>/      records, listings.csv, failures, log; the files with ad
+                                            text (*_records.jsonl, listings.csv) stay local, git-ignored
     docs/runs/iphones_<timestamp>.json/.md  aggregate summary and report (committed)
 
 Safe to interrupt: rerun with --resume and finished listings are skipped. The run

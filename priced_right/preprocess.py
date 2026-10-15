@@ -1,7 +1,8 @@
 """Clean the collected iPhone listings and derive model features.
 
 Reads the latest collection run and writes one row per usable listing:
-    data/processed/iphones_clean.csv   cleaned listings with derived features
+    data/processed/iphones_clean.csv   cleaned listings with derived features (no ad text)
+    data/processed/iphones_text.csv    their titles and descriptions (local only, git-ignored)
     data/processed/cleaning_log.json   rows removed at each cleaning step
 
 Run from the repository root:
@@ -23,6 +24,8 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = REPO_ROOT / "data" / "raw" / "tori"
 PROCESSED_DIR = REPO_ROOT / "data" / "processed"
+# Free text written by sellers: kept out of the public repository, so stored separately
+TEXT_COLUMNS = ["title", "description"]
 
 ACCESSORY_MAX_PRICE = 40  # accessory words in a pricier title usually mean "phone + case"
 # Accessories and spare parts. Substrings, not whole words, because Finnish compounds them:
@@ -124,6 +127,15 @@ _WORD_RE = re.compile(r"\w+")
 def load_clean() -> pd.DataFrame:
     """The cleaned listings written by this module (run it first)."""
     return pd.read_csv(PROCESSED_DIR / "iphones_clean.csv", dtype={"listing_id": str})
+
+
+def load_text() -> pd.DataFrame:
+    """Titles and descriptions of the cleaned listings, keyed by listing_id (local only)."""
+    path = PROCESSED_DIR / "iphones_text.csv"
+    if not path.exists():
+        raise FileNotFoundError(f"{path.relative_to(REPO_ROOT)} is missing: ad text is not in the repository; "
+                                "collect a run and rerun preprocess to create it")
+    return pd.read_csv(path, dtype={"listing_id": str})
 
 
 def latest_run(raw_dir: Path = RAW_DIR) -> Path:
@@ -360,7 +372,8 @@ def main() -> None:
     df, log = clean(raw)
 
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    df.to_csv(PROCESSED_DIR / "iphones_clean.csv", index=False)
+    df.drop(columns=TEXT_COLUMNS).to_csv(PROCESSED_DIR / "iphones_clean.csv", index=False)
+    df[["listing_id", *TEXT_COLUMNS]].to_csv(PROCESSED_DIR / "iphones_text.csv", index=False)
     coverage = {c: round(float(df[c].notna().mean()), 3) for c in ("storage_gb", "battery_pct", "condition")}
     (PROCESSED_DIR / "cleaning_log.json").write_text(json.dumps({
         "source_run": run_dir.name,

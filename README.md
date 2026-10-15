@@ -63,7 +63,7 @@ flowchart LR
 
 - [x] Repo, `priced_right` package, docs (17 Sep)
 - [x] Tori crawler: robots.txt check, ≥3 s between requests, only needed fields, contact details scrubbed, pause/resume (17 Sep)
-- [x] Full iPhone run: 2,178 listings in `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv` ([report](docs/runs/iphones_2026-09-17T110158Z.md))
+- [x] Full iPhone run: 2,178 listings in `data/raw/tori/iphones_2026-09-17T110158Z/listings.csv`, local only ([report](docs/runs/iphones_2026-09-17T110158Z.md))
 - [x] Privacy audit: missed contact details found and removed (see [privacy validation](docs/data-collection-notes.md#privacy-validation))
 - [x] **Cleaning** (`preprocess.py`): 2,007 clean listings, 51 models, derived features ([data dictionary](docs/data-dictionary.md)). Fixes: storage read as a model, spare parts, bundles, iPhone SE generations, and mention flags that ignore negations ("ei halkeamia" = no cracks)
 - [x] **First look:** [notebooks/1.0-eda.ipynb](notebooks/1.0-eda.ipynb), the team's first-look steps with explanations. Price goes most with release year and storage; retailers ask more than private sellers
@@ -227,8 +227,9 @@ priced-right/
 │   └── runs/                        generated report for every run (committed)
 │
 └── data/                            collected data (committed)
-    ├── raw/tori/iphones_<time>/     records, listings.csv, failures, log
-    └── processed/                   iphones_clean.csv, cleaning_log.json (rebuilt by preprocess.py),
+    ├── raw/tori/iphones_<time>/     run metadata, failures, log (records with ad text stay local)
+    └── processed/                   iphones_clean.csv, cleaning_log.json (rebuilt by preprocess.py;
+                                     ad text goes to the local iphones_text.csv),
                                      test_listing_ids.csv (the fixed test set)
 ```
 
@@ -238,7 +239,7 @@ How the pieces fit together:
 flowchart TB
     tori[("Tori.fi")] -->|search + listing pages| client["priced_right/tori.py<br/>requests · robots.txt<br/>parsing · privacy filter"]
     client --> collect["priced_right/collect_iphones.py"]
-    collect --> raw["data/raw/tori/…/listings.csv<br/>committed"]
+    collect --> raw["data/raw/tori/…/listings.csv<br/>local only (ad text)"]
     collect --> reports["docs/runs/ report<br/>committed"]
     raw --> prep["priced_right/preprocess.py"]
     prep --> clean["data/processed/iphones_clean.csv"]
@@ -265,8 +266,10 @@ Add folders only when there is something to put in them. When they are needed, f
 - `reports/figures/`: figures for the report
 - `data/processed/`: cleaned data, always rebuilt by code from `data/raw/`, which is never edited by hand
 
-`data/` is committed so the whole group works from the same dataset. Listing descriptions are
-free text written by sellers, so **the repository must stay private**. A full iPhone run is about
+`data/` is committed so the whole group works from the same dataset, except ad titles and
+descriptions: free text written by sellers stays local (git-ignored), so the repository can be
+public. That means `listings.csv`, the `*_records.jsonl` files and `data/processed/iphones_text.csv`;
+preprocessing needs them, but training, the tests and the app run on `iphones_clean.csv`. A full iPhone run is about
 5 MB; three weeks of daily snapshots would run to hundreds of megabytes, so revisit this before
 daily collection starts.
 
